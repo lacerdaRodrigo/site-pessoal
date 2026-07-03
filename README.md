@@ -187,12 +187,12 @@ docs/
 - **Migração de Stack Frontend (2026-07-02):** o projeto trocou de Flutter Web + Dart para **Next.js + TypeScript**, antes de qualquer código de frontend ter sido escrito. Motivo: o objetivo de aprender Flutter já é coberto por outro projeto pessoal do Rodrigo; Next.js encaixa melhor com a hospedagem já decidida (Vercel), com o núcleo do produto (conteúdo em Markdown) e com o roadmap V2 (portfólio público, que exige SEO). Histórico completo da decisão, incluindo o que foi descartado e por quê, em `docs/01-arquitetura/06-decisoes-tecnicas.md` (ADR 07, ADR 08, ADR 09).
 - **Repositório Git (2026-07-02):** inicializado (branch `main`) e conectado ao repositório remoto [`lacerdaRodrigo/site-pessoal`](https://github.com/lacerdaRodrigo/site-pessoal) no GitHub, via SSH. Primeiro commit (`chore: scaffold inicial do projeto`) enviado com o scaffold do Next.js e toda a documentação SDD.
 - **Revisão de Pendências (2026-07-02):** revisão completa da documentação antes do `create-next-app` fechou 8 pontos em aberto (botão de excluir documento, editor Markdown mobile, regras de `ON DELETE`, unicidade de categoria/etiqueta, política de senha, segredos de CI/CD, nitpick do RNF03, e o porquê de a `anon key` ser segura) — todos decididos e incorporados aos documentos oficiais dos respectivos módulos. O `PENDENCIAS.md` temporário que reunia esses itens foi removido.
+- **Sessão de Autenticação (2026-07-02):** confirmado o uso do comportamento **padrão** do pacote `@supabase/ssr` (sessão via cookies, sincronizada entre cliente e servidor via `middleware.ts`), sem customização — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 6.
 
 ---
 
 ## ❓ Pontos que Ainda Precisam Ser Definidos
 
-- **Segurança Prática:** Como será a configuração de sessão de Autenticação no Next.js (o pacote `@supabase/ssr` já oferece persistência via cookies pronta, sincronizando cliente e servidor; falta confirmar se usaremos o padrão ou algo customizado — ver `docs/04-backend/01-supabase-e-seguranca.md`).
 - **Biblioteca de Editor Markdown:** Ainda não escolhida qual biblioteca/abordagem usar para escrita e renderização de Markdown (ver `docs/01-arquitetura/05-stack-tecnologica.md`).
 
 ---
