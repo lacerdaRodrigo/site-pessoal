@@ -48,8 +48,9 @@ projeto-web/
 
 O `npx create-next-app` foi executado em 2026-07-02 (ver "Próximos Passos" no README). As pastas `src/` (com `src/app/` já criado pelo framework) e `public/` **já existem fisicamente**, junto com `package.json`, `tsconfig.json`, `eslint.config.mjs` e `next.config.ts`.
 
+`src/nucleo/` e `src/funcionalidades/` também já existem, com a árvore Feature-First completa de `docs/03-frontend/01-estrutura-de-pastas.md` montada dentro de `src/` — mas ainda **vazias** (cada pasta-folha tem só um `.gitkeep`, reservando o lugar até receber código de verdade).
+
 Ainda **não existem**:
-- `src/nucleo/` e `src/funcionalidades/` — nascem no próximo passo, quando a árvore Feature-First de `docs/03-frontend/01-estrutura-de-pastas.md` for montada dentro de `src/`.
 - `__tests__/` e `e2e/` — nascem junto com a estratégia de testes (Módulo 06).
 - `.github/workflows/` — nasce junto com o pipeline de CI/CD (Módulo 07).
 - `supabase/` — só será criada quando o primeiro código de backend nascer, seguindo o fluxo de migrations já decidido em `docs/04-backend/02-migrations-e-versionamento.md`.

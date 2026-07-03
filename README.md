@@ -200,5 +200,5 @@ docs/
 ## 📝 Próximos Passos
 1. ✅ Criar os primeiros wireframes/protótipos de tela (Módulo 05) — protótipo navegável em `Knowledge Hub (standalone).html`, com telas e componentes documentados em `docs/05-ui-ux/03-telas-e-componentes.md`.
 2. ✅ Rodar o comando `npx create-next-app` para inicializar o código do projeto — executado em 2026-07-02 com `--ts --app --src-dir --no-tailwind --eslint --use-npm --import-alias "@/*" --disable-git --no-agents-md`. `src/app/`, `public/`, `package.json`, `tsconfig.json` e `eslint.config.mjs` já existem e batem com o planejado em `docs/01-arquitetura/08-estrutura-do-projeto.md`. `npm run dev` testado e responde em `http://localhost:3000` com Turbopack (padrão do Next.js 16, sem flag extra necessária).
-3. Montar a árvore de pastas em Português dentro de `src/` (`nucleo/` e `funcionalidades/`), seguindo `docs/03-frontend/01-estrutura-de-pastas.md`.
+3. ✅ Montar a árvore de pastas em Português dentro de `src/` (`nucleo/` e `funcionalidades/`), seguindo `docs/03-frontend/01-estrutura-de-pastas.md` — pastas ainda vazias (com `.gitkeep`), reservando o lugar de cada camada até ganharem código de verdade. `npm run lint` e `npm run build` confirmados sem erros.
 4. Conectar o projeto ao Supabase e rodar o primeiro teste automatizado.
