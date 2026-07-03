@@ -54,7 +54,7 @@ Ainda **não existem**:
 - `.github/workflows/` — nasce junto com o pipeline de CI/CD (Módulo 07).
 - `supabase/` — só será criada quando o primeiro código de backend nascer, seguindo o fluxo de migrations já decidido em `docs/04-backend/02-migrations-e-versionamento.md`.
 
-O repositório Git ainda não foi inicializado (decisão deliberada, ver README — seção "Decisões Tomadas"); por isso o `create-next-app` foi rodado com a flag `--disable-git`.
+O repositório Git já foi inicializado e conectado ao GitHub (ver README — seção "Decisões Tomadas").
 
 ## 3. Por que documentar uma estrutura que ainda não existe?
 
