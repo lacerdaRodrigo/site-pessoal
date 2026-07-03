@@ -1,0 +1,80 @@
+# Backend — Supabase e Segurança de Dados
+
+O **Knowledge Hub** não terá um servidor backend escrito à mão (ex: Node.js ou Django). Em vez disso, usamos o **Supabase** como *Backend as a Service* (BaaS): ele fornece autenticação, banco de dados e storage prontos, e nosso trabalho é configurá-los corretamente e consumi-los pelo Next.js.
+
+## 1. Os Três Serviços do Supabase Usados no Projeto
+
+### Supabase Auth
+Gerencia cadastro, login, logout, recuperação de senha e emissão do token de sessão (JWT). O Next.js nunca lida com senha em texto puro — apenas envia o formulário e recebe de volta um token, que é anexado automaticamente em toda requisição seguinte.
+
+### PostgreSQL (Banco de Dados)
+Guarda as tabelas `perfis`, `categorias`, `documentos`, `etiquetas` e `documento_etiquetas` (ver modelo completo em `docs/02-banco-de-dados/01-entidades.md`).
+
+### Supabase Storage
+Reservado para uso futuro (ex: anexar imagens a um documento). Não faz parte do escopo funcional do MVP, mas a infraestrutura já vem disponível no mesmo projeto Supabase.
+
+## 2. RLS (Row Level Security) — A Regra de Ouro da Segurança
+
+> 💡 **Nota de Aprendizado (Mentoria):** RLS é uma funcionalidade do próprio PostgreSQL (não é exclusiva do Supabase) que permite escrever regras de acesso *dentro do banco*, linha por linha. Isso é diferente de validar no frontend: mesmo que alguém chame a API diretamente pelo Postman, sem passar pela tela do Flutter, o banco recusa acesso a dados que não são dele.
+
+Toda tabela que guarda dados do usuário terá:
+1. **RLS habilitado** (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`) — por padrão, o Supabase cria tabelas com RLS **desligado**, então isso precisa ser feito explicitamente em toda migration nova.
+2. **Uma policy de `SELECT`, `INSERT`, `UPDATE` e `DELETE`** restringindo `usuario_id = auth.uid()`.
+
+### Exemplo de Policy (referência para quando o código nascer)
+```sql
+create policy "usuarios_veem_apenas_seus_documentos"
+on documentos for select
+using (auth.uid() = usuario_id);
+
+create policy "usuarios_editam_apenas_seus_documentos"
+on documentos for update
+using (auth.uid() = usuario_id);
+```
+
+## 3. Por que a `anon key` Pode Ficar Visível no Navegador (e o que nunca pode)
+
+> 💡 **Ponto de aprendizado confirmado com Rodrigo em 2026-07-02** — registrado aqui porque é o tipo de dúvida que gera pânico (ou excesso de confiança) na primeira code review real.
+
+**A `anon key` não é uma senha — é só um crachá que identifica o projeto.** A segurança não vem de escondê-la; vem inteiramente do RLS (seção 2 acima). Analogia: a `anon key` é a porta da frente destrancada de um prédio — qualquer um entra (qualquer um consegue *chamar* a API do Supabase). Mas dentro do prédio, cada sala (cada linha de cada tabela) tem sua própria trava, que confere o crachá individual de quem entrou antes de deixar ver o que tem lá dentro. Essa trava é o RLS. A porta destrancada não é uma falha, porque nada de valioso fica guardado ali — o valor está trancado sala por sala.
+
+Tecnicamente, duas coisas diferentes estão em jogo:
+1. **A `anon key`** só prova que a requisição pertence ao *projeto* Supabase certo. É pública por design (o próprio Supabase documenta isso assim) — o mesmo princípio de uma chave de API do Google Maps restrita por domínio.
+2. **O JWT de sessão** (emitido no login) é o que prova *quem* está pedindo os dados — carrega o `auth.uid()` real do usuário.
+
+Toda query no Postgres é filtrada pelo RLS usando o `auth.uid()` extraído do JWT, **não** a `anon key`. Se alguém copiar sua `anon key` do DevTools e chamar a API direto pelo Postman sem estar logado como você, o `auth.uid()` dessa chamada é `NULL` — e `NULL` nunca é igual a nenhum `usuario_id`. A policy devolve zero linhas. A chave sozinha não abre porta nenhuma.
+
+### O que seria perigoso de verdade: a `service_role key`
+
+Essa chave (diferente da `anon key`) **ignora o RLS por completo** — é a "chave mestra", pensada só para código de servidor confiável (scripts administrativos, jobs). Se ela vazar, é acesso total e irrestrito ao banco, sem filtro nenhum.
+
+### Solução de segurança adotada para nunca vazar a `service_role key`
+
+1. **Não provisionar ainda.** O escopo do V1 (single user, tudo passa por RLS) **não precisa** de `service_role key` em nenhum lugar do código da aplicação. Ela só existiria por real necessidade futura (ex: um job administrativo em V3). Enquanto não houver essa necessidade, a chave simplesmente não é gerada/usada — reduz a superfície de risco a zero.
+2. **Disciplina de nomes de variável de ambiente:** só `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` recebem o prefixo `NEXT_PUBLIC_`. Se um dia a `service_role key` for necessária, ela se chama `SUPABASE_SERVICE_ROLE_KEY` — **sem** o prefixo, ponto final.
+3. **Módulo central de configuração server-only.** Quando essa chave existir, o acesso a ela fica isolado num único arquivo (ex: `src/nucleo/config/env-servidor.ts`) que importa o pacote `server-only` no topo. Esse pacote faz o **build falhar** se qualquer Client Component tentar importar esse arquivo, direta ou indiretamente — é uma trava automática, não depende de disciplina humana lembrando de "tomar cuidado".
+4. **A chave nunca entra no Git.** `.env.local` (e qualquer `.env*` exceto um `.env.example` sem valores reais) fica no `.gitignore` desde o primeiro commit do projeto.
+5. **Rede de segurança extra:** o GitHub Secret Scanning (gratuito, complementa o Dependabot/CodeQL já decididos no README) varre o repositório procurando padrões de chave de API vazada e alerta automaticamente, caso alguma dessas camadas anteriores falhe.
+
+## 4. Checklist de Segurança para Toda Nova Tabela
+
+Sempre que uma tabela nova for criada no projeto, o checklist abaixo deve ser seguido (e vale a pena copiar esse checklist para o PR/commit que cria a migration):
+- [ ] RLS habilitado.
+- [ ] Policy de `SELECT` restringindo por `auth.uid()`.
+- [ ] Policy de `INSERT` garantindo que `usuario_id` inserido é o do próprio usuário logado.
+- [ ] Policy de `UPDATE` e `DELETE` restringindo por `auth.uid()`.
+- [ ] Teste manual: tentar acessar dado de outro usuário via API e confirmar que retorna vazio/erro.
+
+## 5. Política de Senha e Confirmação de E-mail
+
+**Senha:** mínimo de **8 caracteres** (acima do padrão do Supabase, que é 6), configurado no painel do projeto Supabase (Authentication → Policies) ou via `supabase/config.toml` (`[auth] minimum_password_length = 8`). Sem exigência de composição (símbolo/maiúscula obrigatórios) — comprimento é o que efetivamente dificulta ataques de força bruta; regras de complexidade forçada tendem a produzir senhas previsíveis (`Senha123!`) em vez de senhas fortes.
+
+**Confirmação de e-mail:** mantida **ativada** (comportamento padrão do Supabase Auth) — sem essa confirmação, o RF01.4 ("Esqueci minha senha") fica sem garantia de que o e-mail cadastrado é real e acessível pelo dono da conta.
+
+> 💡 **Nota de Aprendizado (Mentoria):** o receio de "ficar trancado fora da própria conta" (citado na revisão que gerou este documento) é real, mas é sobretudo um problema de **ambiente de desenvolvimento**, não de produção. Rodando o Supabase localmente (`supabase start`), os e-mails de confirmação não saem para a internet — eles caem numa caixa de teste local (Inbucket/Mailpit, acessível em `localhost`), então dá pra confirmar a própria conta sem depender de e-mail real durante os testes. Em produção, o e-mail é real e a confirmação cumpre seu papel de segurança de verdade.
+
+## 6. Autenticação em Cache no Next.js (Ponto em Aberto)
+
+Ainda não decidimos exatamente como o token de sessão será mantido entre recarregamentos de página (F5) e entre Server e Client Components. No ecossistema Flutter, isso era resolvido com `SharedPreferences`/local storage do navegador, gerenciado pelo SDK `supabase_flutter`.
+
+No Next.js a situação é um pouco diferente por causa dos Server Components (ver nota em `docs/01-arquitetura/01-visao-geral.md`): como parte da renderização acontece no servidor da Vercel, a sessão não pode viver só no `localStorage` do navegador (o servidor não tem acesso a ele) — ela geralmente é mantida via **cookies**, usando o pacote oficial `@supabase/ssr`, que sincroniza a sessão entre cliente e servidor automaticamente. A decisão pendente é confirmar se usaremos o comportamento padrão desse pacote ou uma estratégia customizada. Isso será revisitado quando o código de autenticação for escrito.
