@@ -1,45 +1,25 @@
 "use client";
 
 import { useActionState } from "react";
-import { cadastrar, type EstadoAutenticacao } from "../dados/acoes";
+import { redefinirSenha, type EstadoAutenticacao } from "../dados/acoes";
 import estilos from "./formulario.module.css";
 
 const estadoInicial: EstadoAutenticacao = { erro: null };
 
-export function FormularioCadastro() {
+export function FormularioRedefinirSenha() {
   const [estado, executarAcao, emAndamento] = useActionState(
-    cadastrar,
+    redefinirSenha,
     estadoInicial,
   );
-
-  if (estado.mensagem) {
-    return (
-      <div className={estilos.pagina}>
-        <div className={estilos.cartao}>
-          <div className={estilos.logo}>K</div>
-          <p className={estilos.sucesso}>{estado.mensagem}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={estilos.pagina}>
       <div className={estilos.cartao}>
         <div className={estilos.logo}>K</div>
-        <h1 className={estilos.titulo}>Criar conta</h1>
+        <h1 className={estilos.titulo}>Nova senha</h1>
 
         <form action={executarAcao} className={estilos.formulario}>
-          <label htmlFor="email">E-mail</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-          />
-
-          <label htmlFor="senha">Senha</label>
+          <label htmlFor="senha">Nova senha</label>
           <input
             id="senha"
             name="senha"
@@ -56,13 +36,9 @@ export function FormularioCadastro() {
           )}
 
           <button type="submit" disabled={emAndamento}>
-            {emAndamento ? "Cadastrando..." : "Cadastrar"}
+            {emAndamento ? "Salvando..." : "Salvar nova senha"}
           </button>
         </form>
-
-        <p className={estilos.linkSecundario}>
-          Já tem conta? <a href="/login">Entrar</a>
-        </p>
 
         <p className={estilos.rodape}>v0.1.0</p>
       </div>

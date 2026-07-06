@@ -1,14 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { cadastrar, type EstadoAutenticacao } from "../dados/acoes";
+import { solicitarRedefinicaoSenha, type EstadoAutenticacao } from "../dados/acoes";
 import estilos from "./formulario.module.css";
 
 const estadoInicial: EstadoAutenticacao = { erro: null };
 
-export function FormularioCadastro() {
+export function FormularioEsqueciSenha() {
   const [estado, executarAcao, emAndamento] = useActionState(
-    cadastrar,
+    solicitarRedefinicaoSenha,
     estadoInicial,
   );
 
@@ -18,6 +18,9 @@ export function FormularioCadastro() {
         <div className={estilos.cartao}>
           <div className={estilos.logo}>K</div>
           <p className={estilos.sucesso}>{estado.mensagem}</p>
+          <p className={estilos.linkSecundario}>
+            <a href="/login">Voltar para o login</a>
+          </p>
         </div>
       </div>
     );
@@ -27,7 +30,7 @@ export function FormularioCadastro() {
     <div className={estilos.pagina}>
       <div className={estilos.cartao}>
         <div className={estilos.logo}>K</div>
-        <h1 className={estilos.titulo}>Criar conta</h1>
+        <h1 className={estilos.titulo}>Esqueci minha senha</h1>
 
         <form action={executarAcao} className={estilos.formulario}>
           <label htmlFor="email">E-mail</label>
@@ -39,16 +42,6 @@ export function FormularioCadastro() {
             autoComplete="email"
           />
 
-          <label htmlFor="senha">Senha</label>
-          <input
-            id="senha"
-            name="senha"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
-
           {estado.erro && (
             <p className={estilos.erro} role="alert">
               {estado.erro}
@@ -56,12 +49,12 @@ export function FormularioCadastro() {
           )}
 
           <button type="submit" disabled={emAndamento}>
-            {emAndamento ? "Cadastrando..." : "Cadastrar"}
+            {emAndamento ? "Enviando..." : "Enviar link de redefinição"}
           </button>
         </form>
 
         <p className={estilos.linkSecundario}>
-          Já tem conta? <a href="/login">Entrar</a>
+          <a href="/login">Voltar para o login</a>
         </p>
 
         <p className={estilos.rodape}>v0.1.0</p>

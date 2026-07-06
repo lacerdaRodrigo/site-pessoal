@@ -11,19 +11,26 @@ export default async function Home() {
   if (!user) {
     return (
       <div className={estilos.pagina}>
-        <p>
-          Você não está logado. <a href="/login">Entrar</a>
-        </p>
+        <div className={estilos.cartao}>
+          <div className={estilos.logo}>K</div>
+          <p className={estilos.sucesso}>Você não está logado.</p>
+          <p className={estilos.linkSecundario}>
+            <a href="/login">Entrar</a>
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className={estilos.pagina}>
-      <form action={sair} className={estilos.formulario}>
-        <p>Logado como {user.email}</p>
-        <button type="submit">Sair</button>
-      </form>
+      <div className={estilos.cartao}>
+        <div className={estilos.logo}>K</div>
+        <p className={estilos.sucesso}>Logado como {user.email}</p>
+        <form action={sair} className={estilos.formulario}>
+          <button type="submit">Sair</button>
+        </form>
+      </div>
     </div>
   );
 }

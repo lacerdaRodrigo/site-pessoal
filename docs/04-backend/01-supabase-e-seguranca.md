@@ -81,6 +81,22 @@ Sempre que uma tabela nova for criada no projeto, o checklist abaixo deve ser se
 
 **Limite de envio de e-mail do serviço padrão (constatado em 2026-07-05):** o e-mail integrado do Supabase (sem SMTP customizado) tem um limite documentado de **2 e-mails por hora por projeto** (endpoints `/auth/v1/signup`, `/auth/v1/recover`, `/auth/v1/user` — fonte: [documentação oficial de rate limits do Supabase Auth](https://supabase.com/docs/guides/auth/rate-limits)). Isso explica um comportamento observado durante o teste: repetir o cadastro com o mesmo e-mail várias vezes seguidas faz o Supabase parar de enviar o e-mail de confirmação a partir da 3ª tentativa na mesma hora, **sem retornar erro** (o `signUp()` responde como se tivesse dado certo). **Não é um bug do código** — é um limite da infraestrutura gratuita do Supabase, e não há teste automatizado que faça sentido escrever para isso (é um comportamento do serviço externo, não da nossa lógica). Resolve-se apenas configurando SMTP customizado (mesmo item acima, fora de escopo por ora).
 
+**Recuperação de senha — RF01.4 (implementado em 2026-07-05):** diferente da confirmação de cadastro, redefinir a senha exige uma **sessão temporária de recovery** estabelecida via cookie (é preciso estar "autenticado" para poder chamar `supabase.auth.updateUser({ password })`). Por isso, o link do e-mail de recuperação **não pode** apontar direto para uma página de destino como no cadastro — ele passa primeiro por uma rota própria do app, `src/app/auth/confirm/route.ts`, que chama `supabase.auth.verifyOtp({ type, token_hash })` (isso é o que efetivamente grava o cookie de sessão via `criarClienteServidor()`) e só depois redireciona para `/redefinir-senha`. Se o token for inválido ou expirado, redireciona para `/login?erro=link-invalido`.
+
+Fluxo completo:
+1. Usuário pede o link em `/esqueci-senha` → `solicitarRedefinicaoSenha()` chama `supabase.auth.resetPasswordForEmail(email, { redirectTo: ".../auth/confirm?type=recovery&next=/redefinir-senha" })`.
+2. **Configuração manual necessária no painel do Supabase** (Authentication → Email Templates → **Reset Password**): trocar o corpo do e-mail para usar `{{ .TokenHash }}` em vez do `{{ .ConfirmationURL }}` padrão — o padrão não passa pela rota `/auth/confirm` do nosso app, então a sessão de recovery nunca seria estabelecida. O link no template precisa ficar assim:
+   ```
+   {{ .RedirectTo }}&token_hash={{ .TokenHash }}
+   ```
+   `{{ .RedirectTo }}` já renderiza o valor completo que passamos em `redirectTo` no passo 1 (`.../auth/confirm?type=recovery&next=/redefinir-senha`) — por isso o link final some com `&token_hash=...` (não `?`, já tem `?` vindo do `{{ .RedirectTo }}`). Usar `{{ .RedirectTo }}` em vez de escrever `{{ .SiteURL }}/auth/confirm...` fixo no template é o que mantém o link funcionando tanto em `localhost` quanto na Vercel, sem editar o painel de novo a cada ambiente — mesmo princípio do `emailRedirectTo` do cadastro (seção acima).
+3. Usuário clica no e-mail → cai em `/auth/confirm` → sessão de recovery é gravada via cookie → redireciona para `/redefinir-senha`.
+4. Usuário define a nova senha → `redefinirSenha()` chama `supabase.auth.updateUser({ password })` → redireciona para `/login`.
+
+Assim como no cadastro, a mensagem de sucesso do CT-15 (`docs/06-testes/casos-testes/componentes/recuperacao-senha.md`) é **sempre a mesma**, exista ou não o e-mail informado (mesma proteção anti-enumeração). O endpoint `/auth/v1/recover` está sob o mesmo limite de 2 e-mails/hora descrito acima.
+
+Fonte consultada: [supabase.com/docs/guides/auth/passwords](https://supabase.com/docs/guides/auth/passwords).
+
 ## 6. Autenticação em Cache no Next.js (Decidido)
 
 **Decisão confirmada com Rodrigo em 2026-07-02:** a sessão será mantida via **cookies**, usando o comportamento **padrão** do pacote oficial `@supabase/ssr` — sem customização.

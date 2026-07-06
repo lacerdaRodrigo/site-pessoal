@@ -3,11 +3,13 @@ import estilos from "@/funcionalidades/autenticacao/apresentacao/formulario.modu
 export default function PaginaEmailConfirmado() {
   return (
     <div className={estilos.pagina}>
-      <p className={estilos.sucesso}>
-        E-mail confirmado! Sua conta já está ativa.
-        <br />
-        <a href="/login">Entrar agora</a>
-      </p>
+      <div className={estilos.cartao}>
+        <div className={estilos.logo}>K</div>
+        <p className={estilos.sucesso}>E-mail confirmado! Sua conta já está ativa.</p>
+        <p className={estilos.linkSecundario}>
+          <a href="/login">Entrar agora</a>
+        </p>
+      </div>
     </div>
   );
 }
