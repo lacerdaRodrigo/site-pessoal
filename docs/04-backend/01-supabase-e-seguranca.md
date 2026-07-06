@@ -95,6 +95,8 @@ Fluxo completo:
 
 Assim como no cadastro, a mensagem de sucesso do CT-15 (`docs/06-testes/casos-testes/componentes/recuperacao-senha.md`) é **sempre a mesma**, exista ou não o e-mail informado (mesma proteção anti-enumeração). O endpoint `/auth/v1/recover` está sob o mesmo limite de 2 e-mails/hora descrito acima.
 
+**Proteção contra Open Redirect no `?next=` (corrigido em 2026-07-05):** a rota `/auth/confirm` recebe o destino final do fluxo pelo parâmetro `next` da URL — e um parâmetro de URL é sempre entrada externa, mesmo quando somos nós que montamos o link. A implementação original fazia `NextResponse.redirect(new URL(next, origin))` sem validar o valor; como `new URL()` usa o `origin` apenas como *base*, um `next` com URL absoluta (`https://site-malicioso.com`), protocolo-relativa (`//site-malicioso.com`) ou com barra invertida (`/\site-malicioso.com`) ignoraria a base e mandaria o usuário para fora do nosso domínio — a falha clássica de **Open Redirect**, usada em phishing. A correção: o valor passa por `caminhoInternoSeguro()` (`src/nucleo/seguranca/redirecionamento.ts`), que só aceita caminhos internos (começam com `/`, não com `//` nem `/\`) e cai no fallback `/` para qualquer outra coisa. Casos de teste em `docs/06-testes/casos-testes/unitarios/recuperacao-senha.md` (CT-22 a CT-26). A explorabilidade era baixa (o redirect só acontece com `token_hash` válido, que chega apenas no e-mail do dono da conta), mas a validação é barata e a rota tende a ser reaproveitada por fluxos futuros.
+
 Fonte consultada: [supabase.com/docs/guides/auth/passwords](https://supabase.com/docs/guides/auth/passwords).
 
 ## 6. Autenticação em Cache no Next.js (Decidido)
