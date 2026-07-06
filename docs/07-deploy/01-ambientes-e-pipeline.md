@@ -53,3 +53,17 @@ A pipeline completa descrita nas seções 2-4 (gates de lint/teste/migrations an
 - `NEXT_PUBLIC_SITE_URL` não é definida na Vercel — o código (`src/funcionalidades/autenticacao/dados/acoes.ts`) já tem fallback automático para a variável `VERCEL_URL` (injetada pela própria Vercel em todo deploy, com valor diferente por preview), usada para montar o link de confirmação de e-mail (ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 5).
 
 **Ajuste necessário no painel do Supabase:** a cada novo domínio de preview, a URL precisa estar na allow-list de **Authentication → URL Configuration → Redirect URLs**. Como as URLs de preview da Vercel mudam a cada deploy, usa-se um padrão com wildcard (ex: `https://site-pessoal-*.vercel.app/**`) em vez de cadastrar uma URL fixa por deploy.
+
+## 6. CI de Qualidade no GitHub Actions (implementado em 2026-07-05)
+
+Primeira etapa concreta da pipeline da seção 3: o workflow `.github/workflows/ci.yml` roda **lint (ESLint) → testes (Vitest) → build (`next build`, que inclui a checagem de tipos do TypeScript)** a cada `push` na `main` e a cada Pull Request. Isso cobre as etapas 2, 3 (parcialmente) e 5 do ciclo descrito na seção 3.
+
+**Por que agora:** o deploy automático da Vercel (seção 5) já estava ativo **sem nenhum gate de qualidade** — era possível subir código com teste quebrado para produção sem nenhum aviso. Com o CI, todo push passa a ter um veredito visível (✅/❌) no GitHub.
+
+**Limitação honesta (ainda vale a seção 5):** o CI **avisa, mas ainda não bloqueia** — a integração nativa Vercel↔GitHub dispara o deploy em paralelo, sem esperar o resultado do Actions. O bloqueio de verdade virá quando o deploy for movido para dentro do Actions (etapa 6 da seção 3, via `vercel deploy`), ou, como meio-termo, ativando "branch protection" + a opção *Require status checks* no GitHub. Registrado como evolução futura.
+
+**O que ficou de fora por enquanto (e o porquê):**
+- **Testes E2E (Playwright):** rodam contra o deploy real na Vercel e dependem de credenciais de conta de teste (`E2E_EMAIL`/`E2E_SENHA`) que ainda não existem como secret — além de o deploy de preview não estar pronto no instante em que o CI roda (corrida entre Actions e Vercel).
+- **Migrations (`supabase db push`):** ainda não existe nenhuma migration no projeto.
+
+**Segredos exigidos pelo workflow** (adicionar em Settings → Secrets and variables → Actions do repositório — mesmos valores do `.env.local`): `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (já previstos na tabela da seção 4). Sem eles, o passo de testes falha no CT-06 (teste de conexão real com o Supabase) — a mensagem de erro do próprio teste aponta a variável faltante.

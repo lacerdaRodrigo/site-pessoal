@@ -1,0 +1,57 @@
+# CI de Qualidade — primeira etapa da pipeline planejada em
+# docs/07-deploy/01-ambientes-e-pipeline.md (seções 3 e 6).
+#
+# O que roda aqui: lint (ESLint) → testes (Vitest) → build (next build,
+# que inclui a checagem de tipos do TypeScript). Qualquer falha marca o
+# commit/PR com um ❌ no GitHub.
+#
+# O que AINDA não roda aqui (etapas futuras da pipeline completa):
+# - Testes E2E (Playwright) — rodam contra o deploy real na Vercel e
+#   precisam de credenciais de conta de teste (E2E_EMAIL/E2E_SENHA).
+# - Migrations (supabase db push) — ainda não existem migrations.
+# - Deploy via Actions (vercel deploy) — hoje o deploy é feito pela
+#   integração nativa Vercel↔GitHub, que NÃO espera este CI passar.
+#   Ou seja: este workflow avisa, mas ainda não bloqueia a entrega.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  qualidade:
+    name: Lint, testes e build
+    runs-on: ubuntu-latest
+    env:
+      # O runner do GitHub não tem o .env.local (que fica fora do Git) —
+      # as chaves vêm dos GitHub Secrets (Settings → Secrets and variables
+      # → Actions). São valores públicos por design (protegidos por RLS,
+      # ver docs/04-backend/01-supabase-e-seguranca.md), mas mesmo assim
+      # ficam em Secrets para não viverem escritos no repositório.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar o Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci (e não npm install): instala exatamente o que está no
+      # package-lock.json, garantindo que o CI teste as mesmas versões
+      # de pacote usadas em desenvolvimento.
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Testes unitários e de componente (Vitest)
+        run: npm test
+
+      - name: Build de produção (inclui checagem de tipos)
+        run: npm run build

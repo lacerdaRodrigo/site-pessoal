@@ -191,6 +191,7 @@ docs/
 - **Sessão de Autenticação (2026-07-02):** confirmado o uso do comportamento **padrão** do pacote `@supabase/ssr` (sessão via cookies, sincronizada entre cliente e servidor via `proxy.ts`), sem customização — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 6.
 - **Personalização do E-mail de Confirmação (2026-07-05):** o redirecionamento do link de confirmação (`emailRedirectTo`) e o template do e-mail (Authentication → Email Templates no painel do Supabase) foram customizados para não ficar com a aparência genérica padrão do Supabase — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 5.
 - **Ambiente de Teste/Preview (2026-07-05):** deploy de teste no **Vercel**, usando o mesmo projeto Supabase de produção por enquanto (adequado ao estágio atual, single user) — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 5.
+- **CI de Qualidade no GitHub Actions (2026-07-05):** workflow `.github/workflows/ci.yml` rodando lint → testes (Vitest) → build a cada push/PR — primeira etapa concreta da pipeline planejada. Ainda **não bloqueia** o deploy (a integração nativa da Vercel dispara em paralelo); o gate de verdade fica para quando o deploy migrar para dentro do Actions. E2E e migrations ficam de fora por ora. Ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 6.
 - **Casos de Teste Documentados (2026-07-05):** todo teste automatizado (unitário, componente ou E2E) passa a ter um caso de teste correspondente em `docs/06-testes/casos-testes/` — separado em três subpastas por tipo (`unitarios/`, `componentes/`, `e2e/`, sem misturar a escrita de níveis diferentes da pirâmide), escrito para qualquer QA ou pessoa não-técnica entender sem ler código. Ver `docs/06-testes/01-estrategia-de-testes.md`, seção 3.
 - **Mocks: `vi.mock()` para Server Actions, `MSW` para chamadas HTTP do navegador (esclarecido em 2026-07-05):** os testes de componente dos formulários de login/cadastro mockam a Server Action inteira com `vi.mock()` do Vitest, não com `MSW` — uma Server Action não é uma chamada de rede do ponto de vista do teste, então não há o que o `MSW` interceptar. O `MSW` continua reservado para quando o app fizer chamadas HTTP diretas do navegador ao Supabase (ex: CRUD de Documentos) — ver `docs/06-testes/01-estrategia-de-testes.md`, seção 2.
 - **Design System Aplicado nas Telas de Autenticação (2026-07-05):** tokens de cor/tipografia/raio de `docs/05-ui-ux/02-tokens-visuais.md` implementados via CSS custom properties em `globals.css` (CSS puro, sem Tailwind — mantém a decisão já registrada acima), fontes trocadas para Inter + JetBrains Mono, e o layout da tela de Login seguindo `docs/05-ui-ux/03-telas-e-componentes.md`, seção 2.1.
@@ -207,6 +208,7 @@ docs/
   1. **Authentication → URL Configuration → Redirect URLs** — adicionar `http://localhost:3000/auth/confirm` e `https://site-pessoal-wgis.vercel.app/auth/confirm`.
   2. **Authentication → Email Templates → Reset Password** — trocar o corpo do e-mail para usar `{{ .RedirectTo }}&token_hash={{ .TokenHash }}` em vez do `{{ .ConfirmationURL }}` padrão (ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 5, para o porquê e o texto sugerido completo). **Atenção:** rolar até o fim e clicar em "Save" — suspeita-se que essa etapa não tenha sido concluída da vez passada no template "Confirm signup" (pendência acima), já que o texto não mudou.
   - Depois desses dois passos: testar o ciclo completo (CT-21, `docs/06-testes/casos-testes/e2e/recuperacao-senha.md`) — pedir o link em `/esqueci-senha`, abrir o e-mail, clicar, definir nova senha, logar com ela.
+- **🚧 Pendente (2026-07-05) — secrets do CI no GitHub:** o workflow de CI (`.github/workflows/ci.yml`) precisa de dois secrets no repositório (`Settings → Secrets and variables → Actions → New repository secret`): `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`, com os mesmos valores do `.env.local`. **Até serem adicionados, o CI vai aparecer vermelho ❌** — o passo de testes falha no CT-06 (teste de conexão real). Depois de adicionar, basta reexecutar o workflow (aba Actions → Re-run jobs) ou fazer o próximo push.
 
 ---
 
@@ -227,7 +229,8 @@ Visão geral de todo o escopo da V1 (ver `docs/08-roadmap/01-roadmap-detalhado.m
 | Design da tela de Login/Cadastro (design system aplicado) | ✅ |
 | Ambiente de teste/preview (Vercel) | ✅ |
 | Infraestrutura de testes de Componente (React Testing Library) e E2E (Playwright) | ✅ |
-| Pipeline de CI/CD completa (GitHub Actions: lint + testes + migrations) | ⬜ |
+| CI de qualidade (GitHub Actions: lint + testes + build a cada push/PR) | 🚧 |
+| Pipeline de CI/CD completa (deploy gateado + migrations via Actions) | ⬜ |
 | CRUD de Documentos (criar, ler, editar, excluir) | ⬜ |
 | Editor Markdown | ⬜ |
 | Categorias e Etiquetas | ⬜ |
