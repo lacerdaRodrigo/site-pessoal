@@ -75,3 +75,9 @@ export async function cadastrar(
       "Cadastro realizado! Verifique seu e-mail para confirmar a conta antes de entrar.",
   };
 }
+
+export async function sair() {
+  const supabase = await criarClienteServidor();
+  await supabase.auth.signOut();
+  redirect("/login");
+}

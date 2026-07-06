@@ -150,3 +150,20 @@ Este documento registra as decisões técnicas mais importantes no formato **ADR
 - ✅ Ao contrário do GoRouter (que era uma dependência externa, ainda que oficial), o App Router já vem embutido no framework — nenhuma decisão de "qual pacote instalar" é necessária.
 - ✅ Suporta Server Components e layouts aninhados nativamente.
 - ⚠️ Introduz o paradigma de Server Components vs. Client Components, que será explorado com calma quando o código nascer (Módulo 03 e além) — é uma diferença conceitual real em relação ao modelo 100% client-side do Flutter Web.
+
+---
+
+## ADR 10 — Testes E2E (Playwright) rodam contra o ambiente de deploy real, não só `localhost`
+
+**Status:** Ativo. Decidido em 2026-07-05.
+
+**Contexto:** `docs/06-testes/01-estrategia-de-testes.md` já definia o Playwright como ferramenta de E2E, mas sem especificar contra qual ambiente os testes rodariam — a suposição implícita, por não existir deploy ainda, era `localhost`. Nesta mesma conversa em que o ambiente de teste/preview no Vercel foi ativado (ver seção 5 de `docs/07-deploy/01-ambientes-e-pipeline.md`), ficou claro que rodar o E2E contra o deploy real é estritamente melhor, e não custa mais caro.
+
+**Decisão:** Os testes E2E do Playwright vão rodar contra a URL de deploy (preview da Vercel, e futuramente produção), em vez de depender de `next dev` local.
+
+**Consequências:**
+- ✅ O teste valida o software mais próximo do que o usuário real vai experimentar — inclui o comportamento de build de produção (`next build`), não o modo de desenvolvimento.
+- ✅ Não depende do Rodrigo ter o `next dev` rodando localmente pra rodar a suíte de E2E — importante para rodar via GitHub Actions no futuro (a pipeline completa, ainda não implementada).
+- ⚠️ Testes E2E que criam dados reais (ex: cadastro de usuário) passam a interagir com o Supabase de produção/único (mesma decisão de "Ambiente de Teste/Preview" — não há projeto Supabase de teste isolado ainda). Isso significa: dados de teste do E2E podem aparecer misturados com dados reais de uso pessoal, e o limite de e-mail do Supabase (2/hora, ver `docs/04-backend/01-supabase-e-seguranca.md`) pode ser atingido mais rápido se o E2E cadastrar contas repetidamente.
+
+> 💡 **Nota de Aprendizado (Mentoria):** este ADR existe por causa da regra "Decisões Não São Definitivas" registrada no `README.md` — a estratégia de testes original não estava errada, só foi escrita antes de existir um ambiente de deploy pra testar contra. Um ADR novo (em vez de editar o antigo) preserva o raciocínio de por que a decisão evoluiu.

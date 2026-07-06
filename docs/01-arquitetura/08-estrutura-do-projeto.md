@@ -17,23 +17,25 @@ projeto-web/
 │   ├── 04-backend/
 │   ├── 05-ui-ux/
 │   ├── 06-testes/
+│   │   └── casos-testes/        # Casos de teste em Markdown, separados por tipo (unitarios/, componentes/, e2e/)
 │   ├── 07-deploy/
 │   ├── 08-roadmap/
 │   └── 09-documentacao/
 │
-├── src/                         # Código-fonte do projeto (a ser criado)
+├── src/                         # Código-fonte do projeto
 │   ├── app/                     # Rotas do Next.js (App Router) — nome exigido pelo framework
 │   ├── nucleo/                  # Tudo que é global (tema, utilidades, componentes compartilhados)
 │   └── funcionalidades/         # Lógica de negócio por feature (Feature-First) — detalhado no Módulo 03
+│                                 #   testes unitários/componente ficam ao lado do arquivo que testam
+│                                 #   (ex: validacoes.ts + validacoes.test.ts), não numa pasta central
+│                                 #   — decisão de 2026-07-05, substitui o __tests__/ planejado abaixo
 │
-├── __tests__/                   # Testes unitários e de integração (a ser criado — nomenclatura definida no Módulo 06)
-│
-├── e2e/                         # Testes end-to-end (a ser criado — substitui o integration_test/ do Flutter)
+├── testes-e2e/                  # Testes end-to-end (Playwright) — substitui o integration_test/ do Flutter
 │
 ├── public/                      # Assets estáticos (imagens, favicon) — nome exigido pelo framework
 │
 ├── .github/
-│   └── workflows/              # Pipelines de CI/CD (GitHub Actions)
+│   └── workflows/              # Pipelines de CI/CD (GitHub Actions) — ainda não criado, ver Módulo 07
 │
 ├── supabase/                   # Migrations e configuração do Supabase CLI (ver docs/04-backend/02-migrations-e-versionamento.md)
 │
@@ -41,6 +43,8 @@ projeto-web/
 ├── tsconfig.json                # Configuração do TypeScript
 ├── eslint.config.mjs            # Configuração de lint (substitui o analysis_options.yaml do Flutter)
 ├── next.config.ts               # Configuração do Next.js
+├── vitest.config.ts             # Configuração do Vitest (testes unitários e de componente)
+├── playwright.config.ts         # Configuração do Playwright (testes E2E)
 └── README.md                   # Documento raiz — Single Source of Truth do projeto
 ```
 
@@ -48,12 +52,13 @@ projeto-web/
 
 O `npx create-next-app` foi executado em 2026-07-02 (ver "Próximos Passos" no README). As pastas `src/` (com `src/app/` já criado pelo framework) e `public/` **já existem fisicamente**, junto com `package.json`, `tsconfig.json`, `eslint.config.mjs` e `next.config.ts`.
 
-`src/nucleo/` e `src/funcionalidades/` também já existem, com a árvore Feature-First completa de `docs/03-frontend/01-estrutura-de-pastas.md` montada dentro de `src/` — mas ainda **vazias** (cada pasta-folha tem só um `.gitkeep`, reservando o lugar até receber código de verdade).
+`src/nucleo/` e `src/funcionalidades/` já existem e já têm código real (não só `.gitkeep`): conexão com Supabase, telas de login/cadastro, logout, e os respectivos testes de unidade/componente ao lado de cada arquivo.
+
+`testes-e2e/`, `docs/06-testes/casos-testes/`, `vitest.config.ts` e `playwright.config.ts` foram criados em 2026-07-05, junto com a infraestrutura completa de testes (ver `docs/06-testes/01-estrategia-de-testes.md`).
 
 Ainda **não existem**:
-- `__tests__/` e `e2e/` — nascem junto com a estratégia de testes (Módulo 06).
-- `.github/workflows/` — nasce junto com o pipeline de CI/CD (Módulo 07).
-- `supabase/` — só será criada quando o primeiro código de backend nascer, seguindo o fluxo de migrations já decidido em `docs/04-backend/02-migrations-e-versionamento.md`.
+- `.github/workflows/` — nasce junto com o pipeline de CI/CD completo (Módulo 07, seção 5 já cobre o estado intermediário atual via integração nativa Vercel↔GitHub).
+- `supabase/` — só será criada quando o primeiro código de migration nascer, seguindo o fluxo já decidido em `docs/04-backend/02-migrations-e-versionamento.md`.
 
 O repositório Git já foi inicializado e conectado ao GitHub (ver README — seção "Decisões Tomadas").
 

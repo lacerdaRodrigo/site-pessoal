@@ -181,7 +181,8 @@ docs/
 - **Padrão de Documentação:** Adoção do modelo **SDD (Software Design Document)** para as anotações e pastas do projeto, focando em nível profissional.
 - **Sincronia de Documentação (Regra de Ouro):** A documentação é "viva". **É estritamente obrigatório** que qualquer nova decisão técnica, alteração estrutural ou mudança de plano seja imediatamente refletida no documento correspondente **E** no `README.md`. O repositório deve estar sempre 100% atualizado para garantir continuidade perfeita (Single Source of Truth), independentemente do computador em que o projeto for aberto.
 - **Idioma Padrão (Regra de Ouro):** Priorizar e utilizar a língua **Português (PT-BR)** em **tudo** que for possível — documentação, pastas, estruturas, e também **dentro do próprio código**: nomes de variáveis, funções, componentes, tipos/interfaces e tabelas do banco. A única exceção são nomes literalmente exigidos por convenção de framework/ferramenta (ex: `app/`, `public/`, `page.tsx`, `layout.tsx`, palavras reservadas da linguagem) — nesses casos, o inglês é obrigatório e não uma escolha. Fora dessa exceção, PT-BR sempre, para facilitar o aprendizado e domínio dos conceitos.
-- **Testes e QA:** Foco extremo em qualidade (TDD, Testes de Unidade, Componente e E2E).
+- **Decisões Não São Definitivas (Regra de Ouro, reforçada em 2026-07-05):** nenhuma decisão registrada neste projeto é "pedra fundamental" — o projeto é um ambiente de aprendizado (ver [[user-profile]]/`docs/00-visao-do-produto`), e faz parte do processo revisitar uma decisão anterior sempre que a conversa revelar uma abordagem melhor. Quando isso acontecer: (1) a mudança é discutida abertamente, (2) a decisão antiga não é apagada — é marcada como superada, seguindo o mesmo mecanismo de ADR "Superseded" já usado em `docs/01-arquitetura/06-decisoes-tecnicas.md`, e (3) o motivo da mudança fica registrado, não só o resultado. Esta regra nasceu de um caso real: a estratégia de testes (linha abaixo) tinha sido fechada de um jeito e foi revisada nesta mesma conversa para um formato melhor, depois que o ambiente de deploy ficou pronto.
+- **Testes e QA:** Foco extremo em qualidade (TDD, Testes de Unidade, Componente e E2E). **Atualizado em 2026-07-05:** os testes E2E (Playwright) vão rodar contra o ambiente de deploy real (Vercel), não só `localhost` — decisão tomada assim que o ambiente de teste ficou disponível, em vez de esperar a V1 inteira ficar pronta. Ver ADR 10 em `docs/01-arquitetura/06-decisoes-tecnicas.md`.
 - **Hospedagem e Pipeline:** Frontend na Vercel, banco no Supabase. CI/CD automatizado via GitHub Actions executando linter (`ESLint` + `Prettier`) e análise de vulnerabilidades (`Dependabot`).
 - **Versionamento de Banco de Dados:** Uso do **Supabase CLI** para escrever e versionar migrations em `supabase/migrations/`, aplicadas via pipeline de CI/CD (ver `docs/04-backend/02-migrations-e-versionamento.md`).
 - **Migração de Stack Frontend (2026-07-02):** o projeto trocou de Flutter Web + Dart para **Next.js + TypeScript**, antes de qualquer código de frontend ter sido escrito. Motivo: o objetivo de aprender Flutter já é coberto por outro projeto pessoal do Rodrigo; Next.js encaixa melhor com a hospedagem já decidida (Vercel), com o núcleo do produto (conteúdo em Markdown) e com o roadmap V2 (portfólio público, que exige SEO). Histórico completo da decisão, incluindo o que foi descartado e por quê, em `docs/01-arquitetura/06-decisoes-tecnicas.md` (ADR 07, ADR 08, ADR 09).
@@ -190,12 +191,42 @@ docs/
 - **Sessão de Autenticação (2026-07-02):** confirmado o uso do comportamento **padrão** do pacote `@supabase/ssr` (sessão via cookies, sincronizada entre cliente e servidor via `proxy.ts`), sem customização — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 6.
 - **Personalização do E-mail de Confirmação (2026-07-05):** o redirecionamento do link de confirmação (`emailRedirectTo`) e o template do e-mail (Authentication → Email Templates no painel do Supabase) foram customizados para não ficar com a aparência genérica padrão do Supabase — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 5.
 - **Ambiente de Teste/Preview (2026-07-05):** deploy de teste no **Vercel**, usando o mesmo projeto Supabase de produção por enquanto (adequado ao estágio atual, single user) — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 5.
+- **Casos de Teste Documentados (2026-07-05):** todo teste automatizado (unitário, componente ou E2E) passa a ter um caso de teste correspondente em `docs/06-testes/casos-testes/` — separado em três subpastas por tipo (`unitarios/`, `componentes/`, `e2e/`, sem misturar a escrita de níveis diferentes da pirâmide), escrito para qualquer QA ou pessoa não-técnica entender sem ler código. Ver `docs/06-testes/01-estrategia-de-testes.md`, seção 3.
+- **Mocks: `vi.mock()` para Server Actions, `MSW` para chamadas HTTP do navegador (esclarecido em 2026-07-05):** os testes de componente dos formulários de login/cadastro mockam a Server Action inteira com `vi.mock()` do Vitest, não com `MSW` — uma Server Action não é uma chamada de rede do ponto de vista do teste, então não há o que o `MSW` interceptar. O `MSW` continua reservado para quando o app fizer chamadas HTTP diretas do navegador ao Supabase (ex: CRUD de Documentos) — ver `docs/06-testes/01-estrategia-de-testes.md`, seção 2.
 
 ---
 
 ## ❓ Pontos que Ainda Precisam Ser Definidos
 
 - **Biblioteca de Editor Markdown:** Ainda não escolhida qual biblioteca/abordagem usar para escrita e renderização de Markdown (ver `docs/01-arquitetura/05-stack-tecnologica.md`).
+- **🐛 Pendente (2026-07-05):** o template de e-mail de confirmação (Authentication → Email Templates → Confirm signup, no painel do Supabase) ainda não está com o texto customizado — o e-mail recebido continua com a aparência/redação padrão do Supabase, mesmo após a tentativa de edição. Precisa ser revisitado: confirmar se o template foi de fato salvo no painel certo (o mesmo projeto Supabase do `.env.local`) e se não há cache de e-mail já enviado antes da edição.
+
+---
+
+## 🚦 Fases de Desenvolvimento (V1)
+
+Visão geral de todo o escopo da V1 (ver `docs/08-roadmap/01-roadmap-detalhado.md`), com status atualizado a cada avanço. Legenda: ✅ Feito · 🚧 Impedimento (tentado, travou em algo, ver "Pontos que Ainda Precisam Ser Definidos") · ⬜ Não feito.
+
+| Fase | Status |
+|---|---|
+| Planejamento e Documentação (SDD) | ✅ |
+| Scaffold do projeto (Next.js + TypeScript) | ✅ |
+| Estrutura de pastas Feature-First (`nucleo/`, `funcionalidades/`) | ✅ |
+| Conexão com Supabase + teste automatizado de conexão | ✅ |
+| Autenticação — Cadastro e Login (telas + Server Actions) | ✅ |
+| Autenticação — Personalização do e-mail de confirmação | 🚧 |
+| Autenticação — Logout | ✅ |
+| Autenticação — Recuperação de senha (RF01.4) | ⬜ |
+| Ambiente de teste/preview (Vercel) | ✅ |
+| Infraestrutura de testes de Componente (React Testing Library) e E2E (Playwright) | ✅ |
+| Pipeline de CI/CD completa (GitHub Actions: lint + testes + migrations) | ⬜ |
+| CRUD de Documentos (criar, ler, editar, excluir) | ⬜ |
+| Editor Markdown | ⬜ |
+| Categorias e Etiquetas | ⬜ |
+| Busca Global | ⬜ |
+| Favoritos | ⬜ |
+| Dashboard / Painel Inicial | ⬜ |
+| Perfil e Configurações (tema claro/escuro) | ⬜ |
 
 ---
 
@@ -205,4 +236,7 @@ docs/
 3. ✅ Montar a árvore de pastas em Português dentro de `src/` (`nucleo/` e `funcionalidades/`), seguindo `docs/03-frontend/01-estrutura-de-pastas.md` — pastas ainda vazias (com `.gitkeep`), reservando o lugar de cada camada até ganharem código de verdade. `npm run lint` e `npm run build` confirmados sem erros.
 4. ✅ Conectar o projeto ao Supabase e rodar o primeiro teste automatizado (2026-07-05) — projeto Supabase criado, chaves em `.env.local` (fora do Git), SDK (`@supabase/ssr` + `@supabase/supabase-js`) instalado, `Vitest` configurado e primeiro teste de conexão real (`src/nucleo/supabase/conexao.test.ts`) passando. Wrappers de cliente criados em `src/nucleo/supabase/cliente.ts` (navegador) e `servidor.ts` (servidor), e `src/proxy.ts` implementado para renovar a sessão a cada requisição (nome `proxy.ts` por causa da renomeação do arquivo de convenção no Next.js 16 — ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 6).
 5. ✅ Telas de login e cadastro (2026-07-05) — `src/funcionalidades/autenticacao/{dominio,dados,apresentacao}` com validação de e-mail/senha (RF01.1.1, testada em `dominio/validacoes.test.ts`), Server Actions de `entrar`/`cadastrar` e páginas em `/login` e `/cadastro`. E-mail de confirmação personalizado e redirecionado para `/auth/confirmado` (ver seção 5 de `docs/04-backend/01-supabase-e-seguranca.md`).
-6. 🔜 **Em andamento:** ambiente de teste/preview no Vercel, reaproveitando o mesmo projeto Supabase — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 5.
+6. ✅ Ambiente de teste/preview no Vercel (2026-07-05) — repositório conectado, deploy automático funcionando (`/login`, `/cadastro`, `/auth/confirmado` no ar), reaproveitando o mesmo projeto Supabase. Redirect URLs liberadas no painel do Supabase (domínio fixo + wildcard de preview) — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 5. No caminho, corrigido um bloqueio de deploy da Vercel causado por typo no e-mail configurado no Git (não relacionado ao plano gratuito).
+7. 🚧 **Pendente:** personalização do template de e-mail de confirmação ainda não aplicada de fato — ver "Pontos que Ainda Precisam Ser Definidos".
+8. ✅ Logout (2026-07-05) — Server Action `sair()` em `src/funcionalidades/autenticacao/dados/acoes.ts`, e a home (`src/app/page.tsx`) deixou de ser o placeholder do `create-next-app`: agora mostra "Logado como {e-mail}" + botão "Sair" quando há sessão, ou um link para `/login` quando não há.
+9. ✅ Infraestrutura de testes de Componente e E2E (2026-07-05) — React Testing Library + `jest-dom` + `user-event` instalados, ambiente do Vitest trocado para `jsdom` (`vitest.config.ts`), testes de componente escritos para os formulários de login/cadastro (mockando as Server Actions com `vi.mock`). `MSW` instalado para uso futuro (mock de chamadas HTTP reais do navegador, ex: CRUD de Documentos). `Playwright` instalado e configurado (`playwright.config.ts`) rodando contra o deploy real na Vercel (ADR 10), com 4 casos E2E escritos em `testes-e2e/autenticacao.spec.ts` (login, logout, senha incorreta, cadastro com e-mail já confirmado) — pulados automaticamente até existir um `.env.test.local` com `E2E_EMAIL`/`E2E_SENHA` de uma conta de teste confirmada. Todos os 14 casos de teste (unitário + componente + E2E) documentados em `docs/06-testes/casos-testes/{unitarios,componentes,e2e}/autenticacao.md` (nova convenção — ver `docs/06-testes/01-estrategia-de-testes.md`, seção 3).
