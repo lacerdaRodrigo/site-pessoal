@@ -167,3 +167,22 @@ Este documento registra as decisões técnicas mais importantes no formato **ADR
 - ⚠️ Testes E2E que criam dados reais (ex: cadastro de usuário) passam a interagir com o Supabase de produção/único (mesma decisão de "Ambiente de Teste/Preview" — não há projeto Supabase de teste isolado ainda). Isso significa: dados de teste do E2E podem aparecer misturados com dados reais de uso pessoal, e o limite de e-mail do Supabase (2/hora, ver `docs/04-backend/01-supabase-e-seguranca.md`) pode ser atingido mais rápido se o E2E cadastrar contas repetidamente.
 
 > 💡 **Nota de Aprendizado (Mentoria):** este ADR existe por causa da regra "Decisões Não São Definitivas" registrada no `README.md` — a estratégia de testes original não estava errada, só foi escrita antes de existir um ambiente de deploy pra testar contra. Um ADR novo (em vez de editar o antigo) preserva o raciocínio de por que a decisão evoluiu.
+
+## ADR 11 — Fluxo de trabalho via branch + Pull Request, com `main` protegida
+
+**Status:** Ativo. Decidido em 2026-07-05.
+
+**Contexto:** até aqui, todos os commits foram feitos direto na `main` — hábito comum em projeto solo. Com o CI de qualidade e o E2E pós-deploy implementados (seções 6 e 7 de `docs/07-deploy/01-ambientes-e-pipeline.md`), o próprio Rodrigo enxergou a lacuna: no push direto na `main`, a Vercel deploya produção imediatamente e em paralelo aos testes — se um bug escapar, ele fica **em produção** até o E2E acusar. Os gates existem, mas chegam tarde demais para *prevenir*; eles só *detectam*.
+
+**Decisão:** todo trabalho de código passa a ser feito em **branches curtas por assunto**, integradas à `main` via **Pull Request**. A `main` fica protegida no GitHub (*branch protection* exigindo os status checks do CI e do E2E) — o botão de merge só libera com tudo verde. O E2E roda contra o **deploy de preview do PR** (o workflow `e2e.yml` já cobre: o evento `deployment_status` dispara para previews também), então produção só recebe código que já passou por lint, testes, build **e** E2E num clone real da infraestrutura da Vercel.
+
+**Nomenclatura de branches:** mesmo vocabulário dos commits (Conventional Commits já em uso) + descrição curta em PT-BR com hífens: `feat/crud-documentos`, `fix/redirect-login`, `docs/adr-fluxo-pr`, `ci/gate-de-deploy`.
+
+**Consequências:**
+- ✅ Produção nunca recebe código não testado — a frase "o robô bloqueia a entrega" (seção 3 da doc de deploy) vira realidade **sem** precisar mover o deploy para dentro do Actions ainda.
+- ✅ Cada PR ganha uma URL de preview isolada + E2E automático contra ela — dá para *ver* a feature no ar antes de mergear.
+- ✅ Hábito profissional idêntico ao de times reais (objetivo de aprendizado do projeto).
+- ⚠️ Overhead pequeno por mudança: criar branch, abrir PR, aguardar os checks. Aceito de propósito — inclusive para mudanças só de documentação.
+- ⚠️ Depende de um passo manual no painel do GitHub para a proteção valer de fato (ver seção 8 da doc de deploy); até lá, o fluxo é disciplina, não trava.
+
+> 💡 **Nota de Aprendizado (Mentoria):** a alternativa considerada foi rodar o E2E contra um `localhost` dentro do próprio runner do CI (`next build && next start`), antes de qualquer deploy. Foi descartada porque testaria só o *código*, não o *sistema* (variáveis de ambiente do painel da Vercel, HTTPS real, Redirect URLs do Supabase — a classe de problema que já travou o primeiro deploy). O preview de PR dá o melhor dos dois mundos: é a infraestrutura real da Vercel, mas descartável e isolada de produção — mantendo o espírito do ADR 10.

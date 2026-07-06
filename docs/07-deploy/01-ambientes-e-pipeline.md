@@ -78,3 +78,22 @@ Os testes E2E (Playwright) ganharam workflow próprio, `.github/workflows/e2e.ym
 **Detalhes de execução:** instala só o Chromium (`npx playwright install --with-deps chromium`, único navegador configurado); em CI cada teste que falha ganha 1 retry (`retries` no `playwright.config.ts`), o que também ativa a gravação do trace (`on-first-retry`); em caso de falha, os traces sobem como artefato do workflow (baixar e abrir com `npx playwright show-trace`).
 
 **Segredos exigidos:** `E2E_EMAIL` e `E2E_SENHA` (mesmos valores do `.env.test.local` — conta de teste real, já confirmada, no Supabase). Sem eles o workflow ainda passa: os specs pulam (não falham) os casos que exigem login, e rodam apenas os que não dependem de conta (CT-19/CT-20).
+
+## 8. Fluxo de Trabalho: branch + Pull Request, `main` protegida (decidido em 2026-07-05)
+
+Decisão registrada como **ADR 11** (`docs/01-arquitetura/06-decisoes-tecnicas.md`) — contexto e consequências completos lá. Resumo operacional:
+
+**O ciclo de toda mudança de código passa a ser:**
+1. Criar branch a partir da `main`: `git checkout -b feat/nome-da-feature` (nomenclatura: `feat/`, `fix/`, `docs/`, `chore/`, `ci/` + descrição curta em PT-BR).
+2. Commitar na branch e abrir um Pull Request no GitHub.
+3. Automaticamente: o CI (seção 6) roda na branch **e** a Vercel cria um deploy de **preview** com URL própria → o E2E (seção 7) roda contra esse preview.
+4. Tudo verde → merge na `main` → a Vercel deploya produção (com código já testado de ponta a ponta) → o E2E roda de novo contra produção, agora como *smoke test*.
+
+**Ativação da proteção (passo manual no painel do GitHub, feito uma única vez):**
+GitHub → repositório → **Settings → Branches → Add classic branch protection rule**:
+- *Branch name pattern*: `main`
+- ✅ **Require a pull request before merging** — sem marcar "Require approvals" (projeto solo: o GitHub não deixa o autor aprovar o próprio PR, então exigir aprovação travaria tudo).
+- ✅ **Require status checks to pass before merging** — buscar e marcar os dois checks: `Lint, testes e build` (do CI) e `Playwright contra o deploy` (do E2E). Os nomes só aparecem na busca depois de cada workflow ter rodado pelo menos uma vez.
+- ✅ **Do not allow bypassing the above settings** — aplica a regra até para admin (você). Sem isso, o push direto na `main` continuaria passando silenciosamente; se um dia precisar de um bypass de emergência, é só desmarcar temporariamente esta opção no painel.
+
+**Efeito prático:** push direto na `main` passa a ser **rejeitado** pelo GitHub, e o merge de PR fica bloqueado enquanto CI ou E2E estiverem vermelhos — "o robô bloqueia a entrega" (seção 3) de verdade.
