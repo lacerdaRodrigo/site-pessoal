@@ -79,6 +79,8 @@ Os testes E2E (Playwright) ganharam workflow próprio, `.github/workflows/e2e.ym
 
 **Segredos exigidos:** `E2E_EMAIL` e `E2E_SENHA` (mesmos valores do `.env.test.local` — conta de teste real, já confirmada, no Supabase). Sem eles o workflow ainda passa: os specs pulam (não falham) os casos que exigem login, e rodam apenas os que não dependem de conta (CT-19/CT-20).
 
+> ⚠️ **Descoberta na primeira execução real (2026-07-06):** o `environment_url` que a Vercel envia no evento é a **URL interna e única daquele deploy** (ex: `site-pessoal-wgis-h4q2...vercel.app`), não o domínio público — e essas URLs ficam atrás da **Deployment Protection** da Vercel (ativa por padrão), que exige login na Vercel. Resultado: o Playwright do CI recebia um redirect para `vercel.com/sso-api` em vez do app, e a suíte inteira falhava — enquanto localmente passava, porque roda contra o domínio público (sem proteção). Ninguém percebe isso testando no navegador, porque o dono do projeto está logado na Vercel e passa pelo SSO transparentemente. **Correção adotada:** desativar a proteção em **Project Settings → Deployment Protection → Vercel Authentication → Disabled**. Trade-off aceito conscientemente: URLs de preview passam a ser acessíveis por quem tiver o link (endereço longo e não-adivinhável, e o app em si continua protegido pelo login do Supabase). Se um dia a proteção precisar voltar, a alternativa é o "Protection Bypass for Automation" da Vercel (um secret enviado pelo Playwright no header `x-vercel-protection-bypass`).
+
 ## 8. Fluxo de Trabalho: branch + Pull Request, `main` protegida (decidido em 2026-07-05)
 
 Decisão registrada como **ADR 11** (`docs/01-arquitetura/06-decisoes-tecnicas.md`) — contexto e consequências completos lá. Resumo operacional:
