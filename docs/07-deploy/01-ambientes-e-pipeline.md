@@ -36,3 +36,20 @@ Nenhum desses valores fica escrito no código ou no repositório — todos vivem
 | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Etapa 6 (Deploy) | Autenticam o CLI da Vercel para publicar a partir do Actions (em vez de depender só da integração automática da Vercel com o GitHub). |
 
 > 💡 **Nota de Aprendizado (Mentoria):** por que gatilhar o deploy pelo GitHub Actions (etapa 6) em vez de deixar a integração nativa da Vercel com o GitHub fazer isso sozinha? Porque a integração nativa da Vercel dispara o deploy **independente** do resultado do lint/testes — ela não sabe que a etapa 2/3 falhou. Fazendo o Actions chamar o `vercel deploy` explicitamente, a etapa 6 só roda se as anteriores passarem, e "o robô bloqueia a entrega" (como descrito acima) vira verdade de fato, não só uma intenção.
+
+## 5. Deploy de Preview via Integração Nativa (decidido em 2026-07-05)
+
+A pipeline completa descrita nas seções 2-4 (gates de lint/teste/migrations antes do deploy) **ainda não existe** — é o alvo, alinhado ao "Critério de saída da V1" do roadmap (`docs/08-roadmap/01-roadmap-detalhado.md`). Antes de montá-la, decidiu-se ativar um passo intermediário para resolver uma necessidade imediata: testar o app fora do `localhost`.
+
+**Decisão:** conectar o repositório `lacerdaRodrigo/site-pessoal` diretamente à Vercel (import do projeto no painel, sem passar pelo GitHub Actions ainda). Isso ativa o comportamento **padrão** da integração Vercel↔GitHub:
+- Todo `push` na branch `main` gera um deploy de produção automático.
+- Toda outra branch/PR gera uma **URL de preview** própria, isolada, sem afetar produção.
+
+**O que isso NÃO tem (ainda):** nenhum gate de qualidade. Um `push` com lint quebrado ou teste falhando **sobe para produção do mesmo jeito** — diferente do fluxo final descrito nas seções 2-4, que só existirá quando o GitHub Actions assumir o disparo do deploy (ver a nota de aprendizado acima, que explica exatamente por que isso importa).
+
+**Variáveis de ambiente na Vercel** (Project Settings → Environment Variables), usando o **mesmo projeto Supabase** de hoje (decisão: não criar um projeto Supabase separado só para teste, adequado ao estágio atual — single user, sem dado sensível de terceiros):
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` não é definida na Vercel — o código (`src/funcionalidades/autenticacao/dados/acoes.ts`) já tem fallback automático para a variável `VERCEL_URL` (injetada pela própria Vercel em todo deploy, com valor diferente por preview), usada para montar o link de confirmação de e-mail (ver `docs/04-backend/01-supabase-e-seguranca.md`, seção 5).
+
+**Ajuste necessário no painel do Supabase:** a cada novo domínio de preview, a URL precisa estar na allow-list de **Authentication → URL Configuration → Redirect URLs**. Como as URLs de preview da Vercel mudam a cada deploy, usa-se um padrão com wildcard (ex: `https://site-pessoal-*.vercel.app/**`) em vez de cadastrar uma URL fixa por deploy.
