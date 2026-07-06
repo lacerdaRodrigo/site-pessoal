@@ -97,3 +97,5 @@ GitHub → repositório → **Settings → Branches → Add classic branch prote
 - ✅ **Do not allow bypassing the above settings** — aplica a regra até para admin (você). Sem isso, o push direto na `main` continuaria passando silenciosamente; se um dia precisar de um bypass de emergência, é só desmarcar temporariamente esta opção no painel.
 
 **Efeito prático:** push direto na `main` passa a ser **rejeitado** pelo GitHub, e o merge de PR fica bloqueado enquanto CI ou E2E estiverem vermelhos — "o robô bloqueia a entrega" (seção 3) de verdade.
+
+> ⚠️ **Limitação do plano gratuito (descoberta em 2026-07-06):** em repositório **privado**, o GitHub Free permite *criar* a regra, mas **não a aplica** — o próprio painel avisa: *"Your rules won't be enforced on this private repository until you move to a GitHub Team or Enterprise organization account"*. Por isso (somado ao alinhamento com o portfólio público do roadmap V2 e aos ganhos de Actions ilimitado + CodeQL gratuito), o repositório foi tornado **público** em 2026-07-06 — decisão registrada no `README.md`, tomada após varredura completa do histórico do Git confirmar que nenhum segredo foi jamais commitado.
