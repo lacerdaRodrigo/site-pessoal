@@ -46,3 +46,5 @@ npm run test:e2e
 ```
 
 Precisa de um arquivo `.env.test.local` (fora do Git) com `E2E_EMAIL` e `E2E_SENHA` de uma conta já confirmada no Supabase. Sem esse arquivo, os testes são **pulados**, não falham.
+
+**No CI:** estes casos também rodam automaticamente após cada deploy da Vercel (workflow `.github/workflows/e2e.yml`, gatilho `deployment_status` — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 7), usando os secrets `E2E_EMAIL`/`E2E_SENHA` do repositório no lugar do `.env.test.local`.

@@ -63,7 +63,18 @@ Primeira etapa concreta da pipeline da seção 3: o workflow `.github/workflows/
 **Limitação honesta (ainda vale a seção 5):** o CI **avisa, mas ainda não bloqueia** — a integração nativa Vercel↔GitHub dispara o deploy em paralelo, sem esperar o resultado do Actions. O bloqueio de verdade virá quando o deploy for movido para dentro do Actions (etapa 6 da seção 3, via `vercel deploy`), ou, como meio-termo, ativando "branch protection" + a opção *Require status checks* no GitHub. Registrado como evolução futura.
 
 **O que ficou de fora por enquanto (e o porquê):**
-- **Testes E2E (Playwright):** rodam contra o deploy real na Vercel e dependem de credenciais de conta de teste (`E2E_EMAIL`/`E2E_SENHA`) que ainda não existem como secret — além de o deploy de preview não estar pronto no instante em que o CI roda (corrida entre Actions e Vercel).
 - **Migrations (`supabase db push`):** ainda não existe nenhuma migration no projeto.
 
-**Segredos exigidos pelo workflow** (adicionar em Settings → Secrets and variables → Actions do repositório — mesmos valores do `.env.local`): `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (já previstos na tabela da seção 4). Sem eles, o passo de testes falha no CT-06 (teste de conexão real com o Supabase) — a mensagem de erro do próprio teste aponta a variável faltante.
+**Segredos exigidos pelo workflow** (adicionar em Settings → Secrets and variables → Actions do repositório — mesmos valores do `.env.local`): `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (já previstos na tabela da seção 4). Sem eles, o passo de testes falha no CT-06 (teste de conexão real com o Supabase) — a mensagem de erro do próprio teste aponta a variável faltante. **Status:** adicionados em 2026-07-05, CI verde.
+
+## 7. E2E no CI via `deployment_status` (implementado em 2026-07-05)
+
+Os testes E2E (Playwright) ganharam workflow próprio, `.github/workflows/e2e.yml`, separado do CI de qualidade por causa de um problema de **timing**: no evento de `push`, o Actions e o deploy da Vercel largam juntos — se o Playwright rodasse ali, poderia testar o deploy **anterior**, que ainda estaria no ar enquanto o novo builda.
+
+**A solução:** a integração Vercel↔GitHub registra cada deploy como um *Deployment* no GitHub e emite o evento **`deployment_status`** a cada mudança de estado. O workflow dispara apenas quando `state == success` — ou seja, **depois** que o deploy novo está servindo tráfego — e recebe no próprio evento a URL exata daquele deploy (`environment_url`), repassada ao Playwright via `PLAYWRIGHT_BASE_URL` (o `playwright.config.ts` já suportava essa variável). Dois bônus dessa abordagem:
+- **Previews de PR também são testados:** cada preview da Vercel emite seu próprio `deployment_status` com sua própria URL — o E2E roda contra o preview isolado, antes do merge.
+- **Código e site na mesma versão:** o checkout usa `github.event.deployment.sha`, garantindo que os specs testados são os do commit que gerou aquele deploy (e não o estado mais novo da branch).
+
+**Detalhes de execução:** instala só o Chromium (`npx playwright install --with-deps chromium`, único navegador configurado); em CI cada teste que falha ganha 1 retry (`retries` no `playwright.config.ts`), o que também ativa a gravação do trace (`on-first-retry`); em caso de falha, os traces sobem como artefato do workflow (baixar e abrir com `npx playwright show-trace`).
+
+**Segredos exigidos:** `E2E_EMAIL` e `E2E_SENHA` (mesmos valores do `.env.test.local` — conta de teste real, já confirmada, no Supabase). Sem eles o workflow ainda passa: os specs pulam (não falham) os casos que exigem login, e rodam apenas os que não dependem de conta (CT-19/CT-20).

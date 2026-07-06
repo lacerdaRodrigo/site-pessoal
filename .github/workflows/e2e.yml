@@ -1,0 +1,70 @@
+# E2E (Playwright) contra o deploy real — complemento do ci.yml.
+#
+# Por que o gatilho é deployment_status, e não push: no push, este
+# workflow e o deploy da Vercel largariam juntos, e o Playwright poderia
+# acabar testando o deploy ANTERIOR (corrida documentada em
+# docs/07-deploy/01-ambientes-e-pipeline.md, seção 6). A integração
+# Vercel↔GitHub registra cada deploy como um "Deployment" no GitHub e
+# emite o evento deployment_status a cada mudança de estado — disparando
+# só quando state == success, testamos exatamente o deploy que acabou de
+# ficar no ar, na URL exata dele (environment_url). Bônus: funciona
+# também para os deploys de preview de PR, não só produção.
+name: E2E
+
+on:
+  deployment_status:
+
+jobs:
+  e2e:
+    # O evento também é emitido para estados intermediários (pending,
+    # failure) — só interessa quando o deploy ficou pronto com sucesso.
+    if: github.event.deployment_status.state == 'success'
+    name: Playwright contra o deploy
+    runs-on: ubuntu-latest
+    env:
+      # URL exata do deploy que disparou o evento (produção ou preview).
+      # O playwright.config.ts usa esta variável como baseURL.
+      PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.environment_url }}
+      # Conta de teste confirmada (mesmos valores do .env.test.local).
+      # Sem esses secrets, os testes que dependem de login são PULADOS,
+      # não falham — comportamento definido nos próprios specs.
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+      E2E_SENHA: ${{ secrets.E2E_SENHA }}
+    steps:
+      - name: Baixar o código na mesma versão do deploy
+        uses: actions/checkout@v4
+        with:
+          # Sem este ref, o checkout pegaria o estado atual da branch —
+          # que pode já ter commits mais novos que o deploy sendo testado.
+          # Spec e site precisam ser da mesma versão do código.
+          ref: ${{ github.event.deployment.sha }}
+
+      - name: Instalar o Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Baixa o navegador que o Playwright controla (só o Chromium, único
+      # "project" configurado no playwright.config.ts) e as bibliotecas de
+      # sistema que ele exige no Linux (--with-deps).
+      - name: Instalar navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes E2E (Playwright)
+        run: npm run test:e2e
+
+      # Em caso de falha, publica o trace (gravação passo a passo da
+      # sessão do navegador) como artefato do workflow — baixar e abrir
+      # com `npx playwright show-trace <arquivo>` mostra exatamente o que
+      # o navegador estava vendo quando o teste quebrou.
+      - name: Publicar traces da falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

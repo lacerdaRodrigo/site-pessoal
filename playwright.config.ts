@@ -12,6 +12,11 @@ export default defineConfig({
   testDir: "./testes-e2e",
   fullyParallel: true,
   reporter: "list",
+  // No CI (variável CI=true, definida automaticamente pelo GitHub Actions),
+  // uma falha ganha 1 nova tentativa: além de absorver instabilidade
+  // passageira de rede, é o que faz o trace ("on-first-retry", abaixo)
+  // ser gravado quando algo quebra de verdade.
+  retries: process.env.CI ? 1 : 0,
   use: {
     baseURL: urlBase,
     trace: "on-first-retry",

@@ -5,9 +5,11 @@
 # que inclui a checagem de tipos do TypeScript). Qualquer falha marca o
 # commit/PR com um ❌ no GitHub.
 #
-# O que AINDA não roda aqui (etapas futuras da pipeline completa):
-# - Testes E2E (Playwright) — rodam contra o deploy real na Vercel e
-#   precisam de credenciais de conta de teste (E2E_EMAIL/E2E_SENHA).
+# O que roda em outro workflow: os testes E2E (Playwright) ficam em
+# e2e.yml — eles precisam do deploy novo já no ar, então usam o gatilho
+# deployment_status (ver comentário de lá), não o push.
+#
+# O que AINDA não roda em nenhum workflow (etapas futuras):
 # - Migrations (supabase db push) — ainda não existem migrations.
 # - Deploy via Actions (vercel deploy) — hoje o deploy é feito pela
 #   integração nativa Vercel↔GitHub, que NÃO espera este CI passar.

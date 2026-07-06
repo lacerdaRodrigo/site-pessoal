@@ -38,3 +38,5 @@ npm run test:e2e
 ```
 
 Não precisam de `.env.test.local` (não dependem de uma conta pré-existente).
+
+**No CI:** também rodam automaticamente após cada deploy da Vercel (workflow `.github/workflows/e2e.yml`, gatilho `deployment_status` — ver `docs/07-deploy/01-ambientes-e-pipeline.md`, seção 7).
