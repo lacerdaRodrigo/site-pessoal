@@ -52,8 +52,12 @@ jobs:
       - name: Lint (ESLint)
         run: npm run lint
 
-      - name: Testes unitários e de componente (Vitest)
-        run: npm test
+      # Roda os testes JÁ COM cobertura: o vitest.config.ts define uma meta
+      # de 80% na camada de lógica (`dominio/` + `nucleo/`) e o comando falha
+      # se ficar abaixo — o CI bloqueia a entrega. Ver
+      # docs/06-testes/01-estrategia-de-testes.md, seção 5.
+      - name: Testes unitários e de componente + cobertura (Vitest)
+        run: npm run test:coverage
 
       - name: Build de produção (inclui checagem de tipos)
         run: npm run build
