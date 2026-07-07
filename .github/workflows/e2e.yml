@@ -69,7 +69,7 @@ jobs:
       # o navegador estava vendo quando o teste quebrou.
       - name: Publicar traces da falha
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces
           path: test-results/
