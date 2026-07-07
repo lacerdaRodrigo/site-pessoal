@@ -10,7 +10,10 @@ O projeto foi projetado para utilizar serviços consolidados de mercado com cama
 Para garantir que o seu projeto saia da sua máquina direto para o ar com "Nível Senior" de inspeção e segurança (sem gastar nada), adotaremos as seguintes ferramentas:
 
 * **Para Qualidade do Código (Linting rigoroso):** Usaremos `ESLint` (com a configuração oficial do Next.js) combinado com `Prettier` para formatação. Ele aplica regras restritas ao seu código (ex: te avisa sobre tipagem incorreta em TypeScript, imports não usados, etc). Ele analisa o seu código e avisa falhas antes de você testar.
-* **Para Segurança Contra Invasões:** Ativaremos o **Dependabot** (uma ferramenta de segurança gratuita do próprio GitHub). Ele varre o nosso projeto toda semana procurando se estamos usando algum pacote com falha de segurança conhecida pelos hackers, e nos avisa. Também ativaremos o **CodeQL** (robô de segurança do GitHub) que analisa nosso código procurando portas abertas e brechas.
+* **Para Segurança Contra Invasões (ativado em 2026-07-06, tudo gratuito no repositório público, em Settings → Advanced Security):** três defesas que cobrem frentes distintas —
+  * **Dependabot** varre as **dependências** (pacotes npm) semanalmente procurando falhas conhecidas e abre PR de correção automático. As atualizações de rotina são configuradas em `.github/dependabot.yml`.
+  * **CodeQL** analisa o **nosso código** procurando brechas (injection, XSS, portas abertas), a cada push/PR.
+  * **Secret Protection** (Secret Scanning + Push Protection) cuida de **segredos vazados**: varre o repositório atrás de chaves/tokens e **bloqueia o `git push`** se detectar um segredo, impedindo o vazamento antes de acontecer.
 
 ## 3. A Esteira de Automação (A Pipeline CI/CD)
 O processo para colocar uma atualização no ar será totalmente automatizado usando o **GitHub Actions**. O ciclo de vida de uma atualização será:
