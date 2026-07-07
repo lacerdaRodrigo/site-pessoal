@@ -38,7 +38,7 @@ jobs:
       VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - name: Baixar o código na mesma versão do deploy
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Sem este ref, o checkout pegaria o estado atual da branch —
           # que pode já ter commits mais novos que o deploy sendo testado.
