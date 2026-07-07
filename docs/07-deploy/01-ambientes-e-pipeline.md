@@ -93,6 +93,8 @@ Os testes E2E (Playwright) ganharam workflow próprio, `.github/workflows/e2e.ym
 
 Decisão registrada como **ADR 11** (`docs/01-arquitetura/06-decisoes-tecnicas.md`) — contexto e consequências completos lá. Resumo operacional:
 
+**Regra de Ouro — pendências do Git primeiro (2026-07-06):** antes de abrir a branch de uma feature nova, o repositório deve estar **sem pendências no Git** — PRs abertos mergeados (inclusive os automáticos do **Dependabot**), nenhuma branch de trabalho esquecida, nenhum check vermelho. Deixar PRs acumulando gera conflitos, mantém correções de segurança paradas e desalinha a `main`. Só com o repositório limpo se parte para o passo 1 abaixo.
+
 **O ciclo de toda mudança de código passa a ser:**
 1. Criar branch a partir da `main`: `git checkout -b feat/nome-da-feature` (nomenclatura: `feat/`, `fix/`, `docs/`, `chore/`, `ci/` + descrição curta em PT-BR).
 2. Commitar na branch e abrir um Pull Request no GitHub.
