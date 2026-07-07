@@ -8,6 +8,27 @@ dotenv.config({ path: ".env.test.local" });
 const urlBase =
   process.env.PLAYWRIGHT_BASE_URL ?? "https://site-pessoal-wgis.vercel.app";
 
+// A URL interna de um deploy (a que o CI recebe via deployment_status) fica
+// atrás da Deployment Protection da Vercel (Vercel Authentication): sem estar
+// logado na Vercel, a requisição leva um redirect para a tela de login em vez
+// do app, e o Playwright quebra. O "Protection Bypass for Automation" (fluxo
+// oficial da Vercel para CI/E2E) resolve isso — um secret do projeto enviado
+// no header x-vercel-protection-bypass faz a Vercel liberar a requisição sem
+// tocar na proteção real. O valor chega pelo GitHub Secret de mesmo nome
+// (ver docs/07-deploy/01-ambientes-e-pipeline.md, seção 7). Quando ele não
+// existe — ex.: rodar local contra o domínio público, que não é protegido —
+// nenhum header é enviado.
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+const extraHTTPHeaders = bypassSecret
+  ? {
+      "x-vercel-protection-bypass": bypassSecret,
+      // Grava o bypass num cookie (via Set-Cookie) já na primeira resposta,
+      // para que as navegações seguintes dentro do navegador também passem —
+      // necessário para o teste in-browser, não só para a primeira request.
+      "x-vercel-set-bypass-cookie": "true",
+    }
+  : undefined;
+
 export default defineConfig({
   testDir: "./testes-e2e",
   fullyParallel: true,
@@ -20,6 +41,7 @@ export default defineConfig({
   use: {
     baseURL: urlBase,
     trace: "on-first-retry",
+    extraHTTPHeaders,
   },
   projects: [
     {

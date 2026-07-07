@@ -30,6 +30,12 @@ jobs:
       # não falham — comportamento definido nos próprios specs.
       E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
       E2E_SENHA: ${{ secrets.E2E_SENHA }}
+      # Secret do "Protection Bypass for Automation" da Vercel (Project
+      # Settings → Deployment Protection). A environment_url do deploy fica
+      # atrás da Vercel Authentication; sem este bypass o Playwright recebe a
+      # tela de login da Vercel em vez do app. O playwright.config.ts só manda
+      # o header x-vercel-protection-bypass quando esta variável existe.
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - name: Baixar o código na mesma versão do deploy
         uses: actions/checkout@v4
