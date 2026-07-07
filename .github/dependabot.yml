@@ -1,0 +1,41 @@
+# Dependabot — atualização automática de dependências.
+# Doc oficial: https://docs.github.com/code-security/dependabot/dependabot-version-updates
+#
+# Este arquivo cobre as "version updates": os PRs de rotina que sobem as
+# versões dos pacotes. Os "alerts" e "security updates" (que corrigem
+# vulnerabilidades conhecidas) e o CodeQL são ativados à parte, em
+# Settings -> Code security no painel do GitHub — ver
+# docs/07-deploy/01-ambientes-e-pipeline.md, seção 2.
+version: 2
+
+updates:
+  # 1) Dependências do projeto (npm, lidas do package.json).
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      # Uma varredura por semana (bate com "toda semana" descrito na doc).
+      interval: "weekly"
+    # Prefixo do commit alinhado ao padrão do projeto (Conventional Commits).
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    # Agrupa as atualizações pequenas (patch + minor) num único PR por semana,
+    # em vez de abrir um PR por pacote — menos ruído num projeto solo. As
+    # atualizações "major" (que têm mais risco de quebrar) continuam vindo em
+    # PRs separados, para serem revisadas com atenção uma a uma.
+    groups:
+      dependencias-menores:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 2) As próprias GitHub Actions usadas nos workflows (.github/workflows).
+  #    Mantém actions/checkout, setup-node etc. sempre numa versão recente.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"

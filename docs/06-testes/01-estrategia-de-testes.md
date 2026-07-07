@@ -49,3 +49,17 @@ Uma nova funcionalidade só será considerada "Terminada" quando:
 2. Os testes unitários, de componente e de integração estiverem passando com tela verde.
 3. Cada teste tiver seu caso de teste correspondente documentado em `docs/06-testes/casos-testes/` (seção 3 acima).
 4. Não existir nenhum "aviso amarelo" (Warnings de Linting) no código TypeScript (ESLint).
+5. A cobertura de testes da **camada de lógica** se mantiver em **pelo menos 80%** — o CI mede e **bloqueia a entrega** se cair abaixo (ver seção 5).
+
+## 5. Meta de Cobertura de Testes (decidido em 2026-07-06)
+
+**Meta: no mínimo 80% de cobertura na camada de lógica** — medida pelo `Vitest` (`@vitest/coverage-v8`), com o `vitest.config.ts` reprovando (exit code ≠ 0) se ficar abaixo. O CI roda `npm run test:coverage` (workflow `ci.yml`), então um PR que derrube a cobertura da lógica **não passa no gate** e não pode ser mergeado.
+
+**Por que "na lógica" e não cobertura global (nuance de QA):** cobertura mede *linhas executadas por algum teste*, não *se o teste é bom* — dá para ter 90% global com testes que não afirmam nada. E código de UI, configuração e tipos infla ou distorce o número. Por isso a meta é apontada para onde ela **significa** algo: a regra de negócio. O escopo medido é:
+
+- ✅ **Incluído:** `src/funcionalidades/**/dominio/**` (validações e regras) e `src/nucleo/**` (utilitários de núcleo, ex: `seguranca/redirecionamento.ts`).
+- ❌ **Excluído de propósito:** `src/app/**` e `**/apresentacao/**` (UI — validada por testes de componente), `**/dados/**` (Server Actions — validadas por E2E) e `src/nucleo/supabase/**` (wrappers de infra — dependem de ambiente/rede, validados pelo teste de conexão real e pelo E2E). Incluir essas camadas só distorceria o número sem medir a lógica.
+
+**Estado em 2026-07-06:** a camada de lógica está em **100%** (`validacoes.ts` e `redirecionamento.ts`, ambos com teste). A meta protege esse patamar: código de negócio novo sem teste derruba a % e trava o CI — exatamente o "Shift-Left" da seção 1 virando gate automático.
+
+**Ferramentas de análise de código do projeto (o quadro completo):** a qualidade e a validação do código são cobertas por camadas que se complementam — **ESLint + Prettier** (estilo, erros, tipagem), **TypeScript** no `next build` (tipos), **CodeQL** (brechas de segurança), **Dependabot** (vulnerabilidades em dependências) e agora esta **meta de cobertura** (quanto da lógica está testado). Uma ferramenta de *quality gate* unificado com nota, tipo **SonarCloud**, foi **conscientemente adiada** (não descartada): com o código ainda pequeno ela se sobreporia ao ESLint/CodeQL sem ganho proporcional. Passa a fazer sentido quando o código crescer (CRUD, editor, busca) e como item de portfólio na V2.
