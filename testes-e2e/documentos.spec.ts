@@ -56,7 +56,10 @@ test.describe("Documentos", () => {
       .fill("Conteúdo editado pelo teste E2E.");
     await page.getByRole("button", { name: "Salvar alterações" }).click();
 
-    // Volta à leitura com o conteúdo atualizado.
+    // Volta à leitura com o conteúdo atualizado. Espera o título (só existe na
+    // tela de leitura) antes de checar o conteúdo — senão o texto casaria também
+    // com o editor + a pré-visualização ao vivo (dois elementos = strict mode).
+    await expect(page.getByRole("heading", { name: titulo })).toBeVisible();
     await expect(page.getByText("Conteúdo editado pelo teste E2E.")).toBeVisible();
 
     // BUSCAR pelo título na lista (RF03.2): o documento aparece no resultado.
