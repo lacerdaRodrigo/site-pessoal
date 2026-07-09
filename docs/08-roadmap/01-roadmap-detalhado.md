@@ -2,17 +2,19 @@
 
 O README traz a visão macro do roadmap (V1/V2/V3). Este documento detalha um pouco mais o **o quê** de cada fase, sem ainda comprometer prazos (o projeto é pessoal e sem deadline fixo).
 
-## V1 (MVP) — Em Planejamento
+## V1 (MVP) — Em Andamento
 
 Foco: aplicação web funcional, single user, cobrindo o ciclo completo de gestão de conhecimento pessoal.
 
+> **Progresso (2026-07-08):** Autenticação (cadastro/login/logout/recuperação) e a infra de CI/CD/testes já implementadas. **CRUD de Documentos** com editor Markdown, copiar, **categorias (RF03.1)**, **busca por título (RF03.2)** e **favoritos (RF03.3)** implementados na branch atual. **Perfil e Configurações** também implementado com edição de nome e alternância de tema claro/escuro/sistema. Falta na V1: **etiquetas** (nova leva de migrations) e o **dashboard**. Status detalhado por fase no README (seção "Fases de Desenvolvimento").
+
 - Autenticação (cadastro, login, logout, recuperação de senha).
-- CRUD de Documentos com editor Markdown.
-- Categorias e Etiquetas para organização.
-- Busca global por título/conteúdo.
-- Favoritos.
+- CRUD de Documentos com editor Markdown. *(✅ implementado)*
+- Categorias e Etiquetas para organização. *(✅ Categorias — RF03.1; ⏳ Etiquetas pendente, exige nova migration)*
+- Busca global por título/conteúdo. *(✅ por título — RF03.2; busca por conteúdo fica para depois)*
+- Favoritos. *(✅ implementado — RF03.3)*
 - Dashboard com visão geral.
-- Perfil e configurações básicas (incluindo alternância de tema claro/escuro).
+- Perfil e configurações básicas (incluindo alternância de tema claro/escuro). *(✅ implementado — ver "Evolução do Projeto" no README.)*
 - Pipeline de CI/CD com lint, testes e deploy automático.
 
 **Critério de saída da V1:** todos os RF/RNF definidos em `docs/01-arquitetura/03-requisitos-funcionais.md` e `04-requisitos-nao-funcionais.md` implementados e cobertos por testes (ver Definition of Done em `docs/06-testes/01-estrategia-de-testes.md`).

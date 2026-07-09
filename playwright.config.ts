@@ -31,7 +31,10 @@ const extraHTTPHeaders = bypassSecret
 
 export default defineConfig({
   testDir: "./testes-e2e",
-  fullyParallel: true,
+  // Os E2E usam a mesma conta real do Supabase. Rodar em paralelo cria disputa
+  // de sessão/logout entre testes; serializar deixa a suíte mais determinística.
+  fullyParallel: false,
+  workers: 1,
   reporter: "list",
   // No CI (variável CI=true, definida automaticamente pelo GitHub Actions),
   // uma falha ganha 1 nova tentativa: além de absorver instabilidade

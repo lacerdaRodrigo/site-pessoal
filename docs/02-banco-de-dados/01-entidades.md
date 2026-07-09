@@ -112,3 +112,17 @@ create unique index etiquetas_usuario_nome_unico
 ```
 
 **Consequência prática:** se o usuário tentar criar "qa" já tendo "QA", o Supabase retorna um erro de violação de unicidade — a camada de `dados/` (repositório) precisa tratar esse erro e mostrar uma mensagem amigável (ex: "Você já tem uma categoria chamada 'QA'"), em vez de deixar o erro bruto do Postgres vazar pra tela.
+
+## 5. Status de Implementação (2026-07-07)
+
+A modelagem acima deixou de ser só desenho: virou **migrations versionadas e aplicadas** no banco (ver `docs/04-backend/02-migrations-e-versionamento.md`).
+
+| Entidade | Status | Migration |
+|---|---|---|
+| `perfis` | ✅ criada + RLS + trigger de auto-criação no cadastro | `supabase/migrations/20260707120000_criar_tabela_perfis.sql` |
+| `categorias` | ✅ criada + RLS + índice único case-insensitive | `supabase/migrations/20260707120100_criar_tabela_categorias.sql` |
+| `documentos` | ✅ criada + RLS + trigger de `atualizado_em` | `supabase/migrations/20260707120200_criar_tabela_documentos.sql` |
+| `etiquetas` | ⬜ 2ª leva (ainda não modelada em migration) | — |
+| `documento_etiquetas` | ⬜ 2ª leva | — |
+
+**Decisões que se concretizaram nas migrations:** `conteudo` ficou **`NOT NULL` + não-vazio** (decisão de exigir corpo no documento já na criação — mais restrito que o rascunho-só-com-título); `titulo` com `CHECK` não-vazio e `<= 255`; `atualizado_em` mantido correto por um **trigger reutilizável** (`set_atualizado_em()`), para que nenhum caminho do código consiga esquecer de atualizá-lo. As regras de `ON DELETE` da seção 3 e a unicidade da seção 4 foram aplicadas exatamente como descritas. As duas entidades de **etiquetas** ficaram deliberadamente para uma 2ª leva, mantendo a primeira entrega enxuta (só o núcleo `documentos`).

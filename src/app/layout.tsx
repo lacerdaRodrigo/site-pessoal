@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { ProvedorDeTema } from "@/nucleo/tema/ProvedorDeTema";
+import { scriptAntiFlash } from "@/nucleo/tema/scriptAntiFlash";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,8 +25,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${jetBrainsMono.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${jetBrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
+        {/* Aplica o tema salvo antes da primeira pintura (evita flash). */}
+        <script dangerouslySetInnerHTML={{ __html: scriptAntiFlash }} />
+        <ProvedorDeTema>{children}</ProvedorDeTema>
+      </body>
     </html>
   );
 }

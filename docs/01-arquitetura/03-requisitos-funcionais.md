@@ -25,3 +25,9 @@ Os Requisitos Funcionais descrevem todas as ações que o sistema deve permitir 
 * **RF03.1:** O sistema deve permitir atrelar os documentos a **Categorias** maiores (ex: Banco de Dados, IAs, Git).
 * **RF03.2:** O sistema deve disponibilizar uma **Busca Global** na tela inicial, para achar documentos pelo nome digitando.
 * **RF03.3:** O sistema deve permitir marcar documentos como **Favoritos** ("Estrelinha"), os quais aparecerão em uma lista de acesso rápido.
+
+## RF04 — Perfil e Configurações
+* **RF04.1:** O sistema deve permitir que o usuário autenticado visualize seu e-mail de conta como informação somente leitura.
+* **RF04.2:** O sistema deve permitir que o usuário edite e salve seu nome de exibição (`nome_completo`).
+* **RF04.3:** O sistema deve permitir alternar a aparência entre tema claro, escuro e sistema.
+* **RF04.4:** A preferência de tema deve persistir entre recarregamentos do navegador.

@@ -110,10 +110,10 @@ Ajuste de letra (letter-spacing): títulos grandes usam `-0.02em`.
 
 ## 6. Como isso vira código Next.js
 
-> 💡 **Ponto em Aberto:** esta seção assume `Tailwind CSS` como camada de estilização (encaixe natural para traduzir uma tabela de tokens em configuração) e `next-themes` para o toggle dark/light (padrão do ecossistema Next.js, evita "flash" de tema errado por já resolver SSR). Nenhuma das duas é uma decisão fechada em ADR ainda — vale confirmar quando o Módulo 05 entrar em construção prática. Nenhuma delas contraria a decisão de "construir componentes do zero" (README, Decisões Tomadas): são ferramentas de estilização/config, não uma biblioteca de componentes prontos.
+> ✅ **Decisão fechada (2026-07-07):** na prática **não** adotamos Tailwind nem `next-themes`. A estilização é feita com **CSS Modules + variáveis CSS** (os tokens abaixo viram `--variaveis` em `src/app/globals.css`, e cada componente usa seu `*.module.css`), e o toggle dark/light foi **construído do zero**. Motivo: menos dependências, e o padrão CSS Modules já vinha sendo usado desde a autenticação. Isso não contraria nada — só confirma "construir do zero" também na camada de estilização.
 
-- Cada bloco de cor acima = variáveis CSS (dark e light) integradas ao `tailwind.config.ts` como cores customizadas.
-- Tipografia = fontes `Inter` e `JetBrains Mono` carregadas via `next/font`, configuradas em `tailwind.config.ts` (`fontFamily`).
-- O toggle Dark/Light = `next-themes` combinado com a variante `dark:` do Tailwind. Estado de UI mais simples (ex: sidebar aberta) continua usando Zustand, conforme ADR 08.
-- Raios e espaçamentos = extensões em `tailwind.config.ts` (`spacing`, `borderRadius`) para não repetir número mágico.
-- Breakpoint = os breakpoints nativos do Tailwind (ex: `md:`) decidindo entre sidebar fixa e `MenuGaveta` — agora um componente React construído do zero, sem widget nativo equivalente ao `Drawer` que o Flutter oferecia pronto.
+- Cada bloco de cor acima = variáveis CSS (claro e escuro) em `src/app/globals.css`, dentro de `:root`.
+- Tipografia = fontes `Inter` e `JetBrains Mono` carregadas via `next/font` no layout raiz, expostas como `--fonte-ui` / `--fonte-mono`.
+- **Toggle Claro/Escuro/Sistema** = sistema próprio em `src/nucleo/tema/`: um atributo `data-tema-resolvido` no `<html>` seleciona o bloco de variáveis escuras; um **script anti-flash** aplica o tema salvo antes da primeira pintura (evita FOUC) e o `ProvedorDeTema` (Context + `localStorage`) mantém a escolha. O `@media (prefers-color-scheme)` permanece só como fallback sem JavaScript. Estado de UI mais simples (ex: sidebar aberta) seguirá com Zustand, conforme ADR 08.
+- Raios e espaçamentos = valores aplicados direto nos `*.module.css` a partir desta tabela (sem número mágico solto).
+- Breakpoint = `@media` nativo do CSS decidindo entre sidebar fixa e `MenuGaveta` — um componente React construído do zero.
