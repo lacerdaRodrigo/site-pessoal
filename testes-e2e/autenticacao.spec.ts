@@ -19,9 +19,9 @@ test.describe("Autenticação", () => {
     await page.getByLabel("Senha").fill(senha!);
     await page.getByRole("button", { name: "Entrar" }).click();
 
-    // Após o login, a home ("/") redireciona para /documentos (área autenticada),
-    // cujo cabeçalho exibe o e-mail do usuário.
-    await expect(page).toHaveURL(/\/documentos/);
+    // Após o login, a home ("/") redireciona para /inicio (o Dashboard da área
+    // autenticada), cuja sidebar exibe o e-mail do usuário.
+    await expect(page).toHaveURL(/\/inicio/);
     await expect(page.getByText(email!)).toBeVisible();
   });
 

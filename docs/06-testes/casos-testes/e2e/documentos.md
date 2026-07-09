@@ -9,7 +9,7 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
 ## CT-40 — Jornada completa: criar (com categoria), favoritar, editar, buscar e excluir
 - **Pré-condições:** Conta de teste confirmada (`E2E_EMAIL` / `E2E_SENHA` em `.env.test.local`, fora do Git). O deploy alvo já precisa ter a área autenticada de Documentos com categorias, favoritos e busca.
 - **Passos:**
-  1. Fazer login com a conta de teste (a home leva à área autenticada, cujo cabeçalho mostra o e-mail).
+  1. Fazer login com a conta de teste (a home leva à área autenticada, cuja sidebar mostra o e-mail).
   2. Ir em `/documentos` e clicar em "+ Novo documento".
   3. Preencher título (único, com timestamp), **categoria** (única, RF03.1) e conteúdo; clicar em "Criar documento".
   4. Na tela de **leitura**, conferir que o título aparece como cabeçalho, a **categoria** aparece e o conteúdo é renderizado.

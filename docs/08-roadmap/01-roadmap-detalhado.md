@@ -1,19 +1,19 @@
 # Roadmap — Detalhamento por Versão
 
-O README traz a visão macro do roadmap (V1/V2/V3). Este documento detalha um pouco mais o **o quê** de cada fase, sem ainda comprometer prazos (o projeto é pessoal e sem deadline fixo).
+O README traz a visão macro do roadmap (V1/V2/V3). Este documento detalha um pouco mais o **o quê** de cada fase, sem ainda comprometer prazos (o projeto é pessoal e sem deadline fixo). A lista de trabalho concreta e priorizada (lacunas da V1 + backlog) fica em [`02-guia-do-que-falta.md`](02-guia-do-que-falta.md).
 
 ## V1 (MVP) — Em Andamento
 
 Foco: aplicação web funcional, single user, cobrindo o ciclo completo de gestão de conhecimento pessoal.
 
-> **Progresso (2026-07-08):** Autenticação (cadastro/login/logout/recuperação) e a infra de CI/CD/testes já implementadas. **CRUD de Documentos** com editor Markdown, copiar, **categorias (RF03.1)**, **busca por título (RF03.2)** e **favoritos (RF03.3)** implementados na branch atual. **Perfil e Configurações** também implementado com edição de nome e alternância de tema claro/escuro/sistema. Falta na V1: **etiquetas** (nova leva de migrations) e o **dashboard**. Status detalhado por fase no README (seção "Fases de Desenvolvimento").
+> **Progresso (2026-07-08):** V1 funcionalmente completa. Autenticação (cadastro/login/logout/recuperação), CI/CD/testes, **CRUD de Documentos** com editor Markdown e copiar, **categorias (RF03.1)**, **busca por título (RF03.2)**, **favoritos (RF03.3)**, **etiquetas** (tags N:N com filtro), **Perfil e Configurações** (nome + tema claro/escuro/sistema) e o **Dashboard / Painel Inicial** (rota `/inicio`: saudação, busca global, contadores, favoritos e recentes) — todos implementados. Pendência operacional: aplicar a migration de etiquetas no remoto (`supabase db push`).
 
 - Autenticação (cadastro, login, logout, recuperação de senha).
 - CRUD de Documentos com editor Markdown. *(✅ implementado)*
-- Categorias e Etiquetas para organização. *(✅ Categorias — RF03.1; ⏳ Etiquetas pendente, exige nova migration)*
+- Categorias e Etiquetas para organização. *(✅ Categorias — RF03.1; ✅ Etiquetas — tags N:N com autocomplete e filtro)*
 - Busca global por título/conteúdo. *(✅ por título — RF03.2; busca por conteúdo fica para depois)*
 - Favoritos. *(✅ implementado — RF03.3)*
-- Dashboard com visão geral.
+- Dashboard com visão geral. *(✅ implementado — rota `/inicio`)*
 - Perfil e configurações básicas (incluindo alternância de tema claro/escuro). *(✅ implementado — ver "Evolução do Projeto" no README.)*
 - Pipeline de CI/CD com lint, testes e deploy automático.
 

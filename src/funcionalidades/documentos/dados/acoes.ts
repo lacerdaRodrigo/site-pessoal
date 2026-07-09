@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/nucleo/supabase/servidor";
 import { garantirCategoria } from "@/funcionalidades/categorias/dados/consultas";
 import {
+  idsDocumentosComEtiqueta,
+  sincronizarEtiquetas,
+} from "@/funcionalidades/etiquetas/dados/consultas";
+import { separarEtiquetas } from "@/funcionalidades/etiquetas/dominio/etiqueta";
+import {
   conteudoValido,
   tituloValido,
   type Documento,
@@ -20,8 +25,9 @@ export type EstadoDocumento = {
   erro: string | null;
 };
 
-// Formato cru vindo do Postgres (snake_case). O `categorias` aninhado vem do
-// join `select("*, categorias(nome)")` — é o nome da categoria pai (ou null).
+// Formato cru vindo do Postgres (snake_case). Os aninhados vêm dos joins:
+// `categorias` é o nome da categoria pai (ou null); `documento_etiquetas` é a
+// lista de vínculos, cada um com a etiqueta embutida.
 type LinhaDocumento = {
   id: string;
   usuario_id: string;
@@ -32,10 +38,15 @@ type LinhaDocumento = {
   criado_em: string;
   atualizado_em: string;
   categorias?: { nome: string } | null;
+  documento_etiquetas?: {
+    etiquetas: { id: string; usuario_id: string; nome: string } | null;
+  }[] | null;
 };
 
-// Colunas + o join com a categoria pai (para exibir o nome sem uma 2ª consulta).
-const SELECT_COM_CATEGORIA = "*, categorias(nome)";
+// Colunas + joins: categoria pai (nome) e etiquetas (via a junção), para exibir
+// tudo sem consultas extras.
+const SELECT_COM_RELACOES =
+  "*, categorias(nome), documento_etiquetas(etiquetas(id, usuario_id, nome))";
 
 // Traduz a linha do banco (snake_case) para a entidade do domínio (camelCase).
 function mapear(linha: LinhaDocumento): Documento {
@@ -49,13 +60,20 @@ function mapear(linha: LinhaDocumento): Documento {
     criadoEm: linha.criado_em,
     atualizadoEm: linha.atualizado_em,
     categoriaNome: linha.categorias?.nome ?? null,
+    etiquetas: (linha.documento_etiquetas ?? [])
+      .map((v) => v.etiquetas)
+      .filter((e): e is NonNullable<typeof e> => e !== null)
+      .map((e) => ({ id: e.id, usuarioId: e.usuario_id, nome: e.nome }))
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")),
   };
 }
 
-// Filtros opcionais da listagem: busca por título (RF03.2) e categoria (RF03.1).
+// Filtros opcionais da listagem: busca por título (RF03.2), categoria (RF03.1)
+// e etiqueta (organização por tags).
 export type FiltrosDocumentos = {
   busca?: string;
   categoriaId?: string;
+  etiquetaId?: string;
 };
 
 // No ILIKE, `%` e `_` são curingas — escapa-os para buscar o texto literal.
@@ -67,9 +85,19 @@ export async function listarDocumentos(
   filtros: FiltrosDocumentos = {},
 ): Promise<Documento[]> {
   const supabase = await criarClienteServidor();
+
+  // Filtro por etiqueta: resolvemos antes os ids dos documentos que a têm, para
+  // restringir a listagem com um `in`. Se a etiqueta não estiver em nenhum
+  // documento, já devolvemos vazio (o `in([])` do PostgREST é problemático).
+  let idsDaEtiqueta: string[] | null = null;
+  if (filtros.etiquetaId) {
+    idsDaEtiqueta = await idsDocumentosComEtiqueta(filtros.etiquetaId);
+    if (idsDaEtiqueta.length === 0) return [];
+  }
+
   let consulta = supabase
     .from("documentos")
-    .select(SELECT_COM_CATEGORIA)
+    .select(SELECT_COM_RELACOES)
     .order("atualizado_em", { ascending: false });
 
   const busca = filtros.busca?.trim();
@@ -78,6 +106,9 @@ export async function listarDocumentos(
   }
   if (filtros.categoriaId) {
     consulta = consulta.eq("categoria_id", filtros.categoriaId);
+  }
+  if (idsDaEtiqueta) {
+    consulta = consulta.in("id", idsDaEtiqueta);
   }
 
   const { data, error } = await consulta;
@@ -89,7 +120,7 @@ export async function obterDocumento(id: string): Promise<Documento | null> {
   const supabase = await criarClienteServidor();
   const { data, error } = await supabase
     .from("documentos")
-    .select(SELECT_COM_CATEGORIA)
+    .select(SELECT_COM_RELACOES)
     .eq("id", id)
     .maybeSingle();
 
@@ -104,6 +135,7 @@ export async function criarDocumento(
   const titulo = String(formData.get("titulo") ?? "");
   const conteudo = String(formData.get("conteudo") ?? "");
   const categoria = String(formData.get("categoria") ?? "");
+  const etiquetas = separarEtiquetas(String(formData.get("etiquetas") ?? ""));
 
   // Mesmas regras do domínio (que espelham os CHECKs do banco): erro amigável
   // antes de ir ao Supabase.
@@ -140,6 +172,9 @@ export async function criarDocumento(
     return { erro: "Não foi possível criar o documento. Tente de novo." };
   }
 
+  // Vincula as etiquetas digitadas (reaproveita/cria e liga ao documento).
+  await sincronizarEtiquetas(supabase, user.id, data.id, etiquetas);
+
   revalidatePath("/documentos");
   redirect(`/documentos/${data.id}`);
 }
@@ -152,6 +187,7 @@ export async function atualizarDocumento(
   const titulo = String(formData.get("titulo") ?? "");
   const conteudo = String(formData.get("conteudo") ?? "");
   const categoria = String(formData.get("categoria") ?? "");
+  const etiquetas = separarEtiquetas(String(formData.get("etiquetas") ?? ""));
 
   if (!id) return { erro: "Documento inválido." };
   if (!tituloValido(titulo)) {
@@ -179,6 +215,9 @@ export async function atualizarDocumento(
   if (error) {
     return { erro: "Não foi possível salvar as alterações." };
   }
+
+  // Reescreve o conjunto de etiquetas do documento com o que veio do formulário.
+  await sincronizarEtiquetas(supabase, user.id, id, etiquetas);
 
   revalidatePath("/documentos");
   revalidatePath(`/documentos/${id}`);

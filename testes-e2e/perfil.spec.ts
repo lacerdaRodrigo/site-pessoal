@@ -17,7 +17,7 @@ test.describe("Perfil e Configurações", () => {
     await page.getByLabel("E-mail").fill(email!);
     await page.getByLabel("Senha").fill(senha!);
     await page.getByRole("button", { name: "Entrar" }).click();
-    // Login leva à área autenticada (/); o cabeçalho mostra o e-mail.
+    // Login leva à área autenticada; a sidebar mostra o e-mail.
     await expect(page.getByText(email!)).toBeVisible();
 
     await page.goto("/configuracoes");
@@ -30,8 +30,8 @@ test.describe("Perfil e Configurações", () => {
     await page.getByRole("button", { name: "Salvar" }).click();
     await expect(page.getByText("Perfil atualizado!")).toBeVisible();
 
-    await page.getByRole("radio", { name: "Escuro" }).click();
-    await expect(page.getByRole("radio", { name: "Escuro" })).toHaveAttribute(
+    await page.getByRole("main").getByRole("radio", { name: "Escuro" }).click();
+    await expect(page.getByRole("main").getByRole("radio", { name: "Escuro" })).toHaveAttribute(
       "aria-checked",
       "true",
     );
@@ -43,7 +43,7 @@ test.describe("Perfil e Configurações", () => {
     await page.reload();
 
     await expect(page.getByLabel("Nome de exibição")).toHaveValue(nome);
-    await expect(page.getByRole("radio", { name: "Escuro" })).toHaveAttribute(
+    await expect(page.getByRole("main").getByRole("radio", { name: "Escuro" })).toHaveAttribute(
       "aria-checked",
       "true",
     );

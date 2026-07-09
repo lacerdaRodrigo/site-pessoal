@@ -4,6 +4,8 @@
 // (supabase/migrations/20260707120200_criar_tabela_documentos.sql), para dar um
 // erro amigável na aplicação antes de a requisição chegar no banco.
 
+import type { Etiqueta } from "@/funcionalidades/etiquetas/dominio/etiqueta";
+
 // Limite igual ao CHECK do banco (titulo text ... length(titulo) <= 255).
 export const TAMANHO_MAXIMO_TITULO = 255;
 
@@ -25,6 +27,10 @@ export type Documento = {
   // de dados quando ela faz o join com `categorias`; opcional porque a entidade
   // pura não depende dele (a fonte da verdade do vínculo é `categoriaId`).
   categoriaNome?: string | null;
+  // Etiquetas do documento, DENORMALIZADAS para exibição. Preenchidas pela camada
+  // de dados a partir do join com `documento_etiquetas`/`etiquetas`. Opcional: a
+  // fonte da verdade do vínculo é a tabela de junção, não este campo.
+  etiquetas?: Etiqueta[];
 };
 
 /**

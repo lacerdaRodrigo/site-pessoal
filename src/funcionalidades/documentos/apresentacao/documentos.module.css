@@ -1,101 +1,6 @@
-/* Shell da área autenticada + telas de Documentos. Usa os tokens de globals.css. */
-
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: var(--bg);
-}
-
-.cabecalho {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 24px;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-}
-
-.marca {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  font-family: var(--fonte-mono), monospace;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.usuario {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.navegacao {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.navegacao a {
-  padding: 7px 10px;
-  border-radius: 8px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.navegacao a:hover {
-  background: var(--hover);
-  color: var(--text);
-}
-
-.email {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.botaoSair {
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.16s;
-}
-
-.botaoSair:hover {
-  background: var(--hover);
-}
-
-.conteudo {
-  width: 100%;
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-}
+/* Telas de Documentos (lista, editor e visualização). Usa os tokens de
+   globals.css. A casca da área autenticada (sidebar + gaveta) vive em
+   src/nucleo/componentes/appShell.module.css. */
 
 /* ----- Lista ----- */
 
@@ -272,6 +177,56 @@
   color: var(--primary);
   font-size: 12px;
   font-weight: 600;
+}
+
+/* Etiquetas (tags): visual mais discreto que o chip de categoria, para não
+   competir com ele. Como link (card/leitura) ganha realce no hover. */
+.chipEtiqueta {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a.chipEtiqueta:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Lista de etiquetas na tela de leitura do documento. */
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+/* Indicador do filtro por etiqueta ativo, acima da lista. */
+.filtroEtiqueta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--faint);
+  font-size: 14px;
+}
+
+.limparFiltro {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.limparFiltro:hover {
+  text-decoration: underline;
 }
 
 /* Estrela de favoritar (botão-form em card e na tela de leitura) */

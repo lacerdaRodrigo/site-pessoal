@@ -121,4 +121,35 @@ describe("FormularioDocumento", () => {
     );
     expect(opcoes).toEqual(["Git", "Banco de Dados"]);
   });
+
+  it("CT-87: (editar) o campo Etiquetas vem preenchido com as etiquetas do documento", () => {
+    render(
+      <FormularioDocumento
+        documento={{
+          ...documentoExemplo,
+          etiquetas: [
+            { id: "e1", usuarioId: "user-1", nome: "dart" },
+            { id: "e2", usuarioId: "user-1", nome: "testes" },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByLabelText("Etiquetas")).toHaveValue("dart, testes");
+  });
+
+  it("CT-88: (criar) as etiquetas existentes viram opções de autocomplete", () => {
+    const etiquetasExistentes = [
+      { id: "e1", usuarioId: "user-1", nome: "dart" },
+      { id: "e2", usuarioId: "user-1", nome: "testes" },
+    ];
+    const { container } = render(
+      <FormularioDocumento etiquetasExistentes={etiquetasExistentes} />,
+    );
+
+    const opcoes = Array.from(
+      container.querySelectorAll("#lista-etiquetas option"),
+    ).map((o) => o.getAttribute("value"));
+    expect(opcoes).toEqual(["dart", "testes"]);
+  });
 });

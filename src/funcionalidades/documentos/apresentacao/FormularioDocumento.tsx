@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useActionState } from "react";
 import type { Categoria } from "@/funcionalidades/categorias/dominio/categoria";
 import {
+  juntarEtiquetas,
+  type Etiqueta,
+} from "@/funcionalidades/etiquetas/dominio/etiqueta";
+import {
   atualizarDocumento,
   criarDocumento,
   type EstadoDocumento,
@@ -15,13 +19,16 @@ const estadoInicial: EstadoDocumento = { erro: null };
 
 // Serve tanto para CRIAR (sem prop `documento`) quanto para EDITAR (com prop).
 // A exclusão vive na tela de visualização (VisualizacaoDocumento), não aqui.
-// `categorias` alimenta o autocomplete do campo de categoria (RF03.1).
+// `categorias`/`etiquetasExistentes` alimentam o autocomplete dos respectivos
+// campos (RF03.1 e organização por tags).
 export function FormularioDocumento({
   documento,
   categorias = [],
+  etiquetasExistentes = [],
 }: {
   documento?: Documento;
   categorias?: Categoria[];
+  etiquetasExistentes?: Etiqueta[];
 }) {
   const editando = Boolean(documento);
   const [estado, executarAcao, emAndamento] = useActionState(
@@ -68,6 +75,23 @@ export function FormularioDocumento({
         <datalist id="lista-categorias">
           {categorias.map((c) => (
             <option key={c.id} value={c.nome} />
+          ))}
+        </datalist>
+
+        {/* Etiquetas opcionais (tags), separadas por vírgula. O <datalist>
+            sugere as já existentes; nomes novos são criados no servidor
+            (find-or-create), e o "#" que o usuário digitar é ignorado. */}
+        <input
+          name="etiquetas"
+          list="lista-etiquetas"
+          aria-label="Etiquetas"
+          className={estilos.campoCategoria}
+          placeholder="Etiquetas (opcional), separadas por vírgula — ex: dart, testes"
+          defaultValue={juntarEtiquetas(documento?.etiquetas ?? [])}
+        />
+        <datalist id="lista-etiquetas">
+          {etiquetasExistentes.map((e) => (
+            <option key={e.id} value={e.nome} />
           ))}
         </datalist>
 

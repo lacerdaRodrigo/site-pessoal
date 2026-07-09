@@ -20,7 +20,7 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
   1. Acessar `/login`.
   2. Preencher e-mail e senha corretos.
   3. Clicar em "Entrar".
-- **Resultado esperado:** Redirecionamento para `/`, exibindo "Logado como {e-mail}".
+- **Resultado esperado:** Redirecionamento para `/inicio` (o Dashboard), com o e-mail do usuário visível na sidebar.
 
 ## CT-12 — Logout remove a sessão
 - **Pré-condições:** Mesma conta de teste do CT-11; usuário precisa estar logado (o teste faz login antes de testar o logout).

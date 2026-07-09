@@ -17,16 +17,20 @@ test.describe("Documentos", () => {
     const titulo = `Documento E2E ${Date.now()}`;
     const categoria = `Cat E2E ${Date.now()}`;
 
-    // Login (redireciona para /, que leva à área autenticada /documentos).
+    // Login (redireciona para /, que leva à área autenticada /inicio).
     await page.goto("/login");
     await page.getByLabel("E-mail").fill(email!);
     await page.getByLabel("Senha").fill(senha!);
     await page.getByRole("button", { name: "Entrar" }).click();
     await expect(page.getByText(email!)).toBeVisible();
 
-    // CRIAR (com categoria — RF03.1).
+    // CRIAR (com categoria — RF03.1). "+ Novo documento" existe na sidebar e no
+    // topo da lista; usamos o da área principal (getByRole("main")).
     await page.goto("/documentos");
-    await page.getByRole("link", { name: "+ Novo documento" }).click();
+    await page
+      .getByRole("main")
+      .getByRole("link", { name: "+ Novo documento" })
+      .click();
     await page.getByLabel("Título do documento").fill(titulo);
     await page.getByLabel("Categoria").fill(categoria);
     await page
