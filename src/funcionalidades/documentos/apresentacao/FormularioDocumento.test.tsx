@@ -152,4 +152,39 @@ describe("FormularioDocumento", () => {
     ).map((o) => o.getAttribute("value"));
     expect(opcoes).toEqual(["dart", "testes"]);
   });
+
+  it("CT-91: a pré-visualização renderiza o Markdown ao vivo conforme digita (spec 2.6)", async () => {
+    const usuario = userEvent.setup();
+    render(<FormularioDocumento />);
+
+    // Antes de digitar, o painel mostra o placeholder, não um cabeçalho.
+    expect(
+      screen.queryByRole("heading", { name: "Olá" }),
+    ).not.toBeInTheDocument();
+
+    await usuario.type(
+      screen.getByLabelText("Conteúdo do documento"),
+      "# Olá",
+    );
+
+    // O "# Olá" digitado vira um <h1> renderizado na pré-visualização.
+    expect(
+      await screen.findByRole("heading", { name: "Olá" }),
+    ).toBeInTheDocument();
+  });
+
+  it("CT-92: no mobile, alternar para a aba Pré-visualização marca-a como ativa (spec 2.6)", async () => {
+    const usuario = userEvent.setup();
+    render(<FormularioDocumento />);
+
+    const abaEditar = screen.getByRole("tab", { name: "Editar" });
+    const abaPreview = screen.getByRole("tab", { name: "Pré-visualização" });
+    expect(abaEditar).toHaveAttribute("aria-selected", "true");
+    expect(abaPreview).toHaveAttribute("aria-selected", "false");
+
+    await usuario.click(abaPreview);
+
+    expect(abaPreview).toHaveAttribute("aria-selected", "true");
+    expect(abaEditar).toHaveAttribute("aria-selected", "false");
+  });
 });

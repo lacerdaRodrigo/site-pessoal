@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Categoria } from "@/funcionalidades/categorias/dominio/categoria";
 import {
   juntarEtiquetas,
@@ -35,6 +37,11 @@ export function FormularioDocumento({
     editando ? atualizarDocumento : criarDocumento,
     estadoInicial,
   );
+
+  // Conteúdo controlado: alimenta a pré-visualização Markdown ao vivo (spec 2.6).
+  const [conteudo, setConteudo] = useState(documento?.conteudo ?? "");
+  // No mobile, o editor e a pré-visualização viram abas; "editar" é a padrão.
+  const [abaAtiva, setAbaAtiva] = useState<"editar" | "preview">("editar");
 
   // Ao editar, "Voltar" leva à leitura do próprio documento; ao criar, à lista.
   const destinoVoltar = documento ? `/documentos/${documento.id}` : "/documentos";
@@ -95,14 +102,69 @@ export function FormularioDocumento({
           ))}
         </datalist>
 
-        <textarea
-          name="conteudo"
-          aria-label="Conteúdo do documento"
-          className={estilos.campoConteudo}
-          placeholder="Escreva aqui o seu prompt, comando, query... (Markdown suportado)"
-          defaultValue={documento?.conteudo ?? ""}
-          required
-        />
+        {/* Editor + pré-visualização ao vivo (spec 2.6). No desktop, os dois
+            painéis ficam lado a lado; abaixo de 768px viram abas (Editar |
+            Pré-visualização) e só o painel da aba ativa aparece. */}
+        <div
+          className={estilos.abas}
+          role="tablist"
+          aria-label="Editor e pré-visualização"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={abaAtiva === "editar"}
+            className={`${estilos.aba} ${
+              abaAtiva === "editar" ? estilos.abaAtiva : ""
+            }`}
+            onClick={() => setAbaAtiva("editar")}
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={abaAtiva === "preview"}
+            className={`${estilos.aba} ${
+              abaAtiva === "preview" ? estilos.abaAtiva : ""
+            }`}
+            onClick={() => setAbaAtiva("preview")}
+          >
+            Pré-visualização
+          </button>
+        </div>
+
+        <div className={estilos.editorGrid}>
+          <textarea
+            name="conteudo"
+            aria-label="Conteúdo do documento"
+            className={`${estilos.campoConteudo} ${
+              abaAtiva === "preview" ? estilos.painelOculto : ""
+            }`}
+            placeholder="Escreva aqui o seu prompt, comando, query... (Markdown suportado)"
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
+            required
+          />
+          <div
+            className={`${estilos.preview} ${
+              abaAtiva === "editar" ? estilos.painelOculto : ""
+            }`}
+            aria-label="Pré-visualização"
+          >
+            {conteudo.trim() ? (
+              <article className={estilos.markdown}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {conteudo}
+                </ReactMarkdown>
+              </article>
+            ) : (
+              <p className={estilos.previewVazio}>
+                A pré-visualização aparece aqui conforme você escreve.
+              </p>
+            )}
+          </div>
+        </div>
 
         {estado.erro && (
           <p className={estilos.erro} role="alert">

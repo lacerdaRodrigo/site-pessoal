@@ -361,6 +361,72 @@ a.chipEtiqueta:hover {
   box-shadow: 0 0 0 3px var(--primary-anel);
 }
 
+/* ----- Editor + pré-visualização (spec 2.6) ----- */
+
+/* No desktop, editor e preview lado a lado. */
+.editorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Painel de pré-visualização: mesma "moldura" do editor, rolando se crescer. */
+.preview {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  min-height: 320px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.previewVazio {
+  color: var(--faint);
+  font-size: 14px;
+}
+
+/* As abas só aparecem no mobile (ver media query). */
+.abas {
+  display: none;
+  gap: 6px;
+}
+
+.aba {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.abaAtiva {
+  background: var(--primary-anel);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  /* Empilha (uma coluna) e mostra as abas; só o painel da aba ativa aparece. */
+  .editorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .abas {
+    display: flex;
+  }
+
+  /* .painelOculto só tem efeito no mobile: no desktop os dois painéis ficam
+     sempre visíveis, independente da aba selecionada. */
+  .painelOculto {
+    display: none;
+  }
+}
+
 .erro {
   font-size: 13px;
   color: #ef4444;
