@@ -67,6 +67,13 @@ Estrutura de duas colunas presente em todas as telas internas:
 
 **Comportamento responsivo (breakpoint < 768px):** as duas colunas lado a lado não cabem numa tela de celular. Abaixo de 768px, a área vira **abas alternáveis** (`Editar` | `Pré-visualização`) em vez de colunas lado a lado — empilhar as duas verticalmente deixaria cada painel curto demais pra ser útil numa tela de ~390px. A aba `Editar` é a padrão ao abrir o editor (é onde o usuário passa a maior parte do tempo); trocar para `Pré-visualização` é uma ação explícita. Ver token `mobile` em `02-tokens-visuais.md`, seção 5.
 
+### 2.7 Configurações — `funcionalidades/perfil/`
+- Título "Configurações".
+- Seção **Perfil**: e-mail somente leitura e campo "Nome de exibição" editável.
+- Seção **Aparência**: seletor segmentado com **Claro**, **Escuro** e **Sistema**.
+- Salvar perfil exibe feedback de sucesso ou erro inline.
+- A troca de tema é imediata e permanece depois de recarregar a página.
+
 ---
 
 ## 3. Estados e comportamentos (para casos de teste)

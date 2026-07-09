@@ -19,7 +19,10 @@ test.describe("Autenticação", () => {
     await page.getByLabel("Senha").fill(senha!);
     await page.getByRole("button", { name: "Entrar" }).click();
 
-    await expect(page.getByText(`Logado como ${email}`)).toBeVisible();
+    // Após o login, a home ("/") redireciona para /documentos (área autenticada),
+    // cujo cabeçalho exibe o e-mail do usuário.
+    await expect(page).toHaveURL(/\/documentos/);
+    await expect(page.getByText(email!)).toBeVisible();
   });
 
   test("CT-12: logout remove a sessão e volta para /login", async ({ page }) => {
@@ -29,7 +32,7 @@ test.describe("Autenticação", () => {
     await page.getByLabel("E-mail").fill(email!);
     await page.getByLabel("Senha").fill(senha!);
     await page.getByRole("button", { name: "Entrar" }).click();
-    await expect(page.getByText(`Logado como ${email}`)).toBeVisible();
+    await expect(page.getByText(email!)).toBeVisible();
 
     await page.getByRole("button", { name: "Sair" }).click();
     await expect(page).toHaveURL(/\/login$/);

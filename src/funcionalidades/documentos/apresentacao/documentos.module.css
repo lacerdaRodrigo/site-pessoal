@@ -1,0 +1,571 @@
+/* Shell da área autenticada + telas de Documentos. Usa os tokens de globals.css. */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--fonte-mono), monospace;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.navegacao {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.navegacao a {
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.navegacao a:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.email {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.botaoSair {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s;
+}
+
+.botaoSair:hover {
+  background: var(--hover);
+}
+
+.conteudo {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+/* ----- Lista ----- */
+
+.listaTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tituloPagina {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.botaoPrimario {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 9px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.16s, transform 0.16s;
+}
+
+.botaoPrimario:hover:not(:disabled) {
+  box-shadow: 0 6px 20px var(--primary-sombra);
+  transform: translateY(-1px);
+}
+
+.botaoPrimario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vazio {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+/* ----- Busca e filtros ----- */
+
+.buscaForm {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.buscaInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+
+.buscaInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-anel);
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.chipFiltro {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+
+.chipFiltro:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.chipFiltroAtivo {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.chipFiltroAtivo:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.secaoTitulo {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ----- Lista de cards ----- */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin-bottom: 24px;
+}
+
+.item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.16s, transform 0.16s;
+}
+
+.card:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.cardTitulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--primary-anel);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Estrela de favoritar (botão-form em card e na tela de leitura) */
+.formEstrela {
+  display: flex;
+}
+
+.botaoEstrela {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--faint);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.16s, border-color 0.16s, background 0.16s;
+}
+
+.botaoEstrela:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.botaoEstrelaAtivo {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.estrela {
+  color: var(--primary);
+}
+
+.cardData {
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+/* ----- Editor (criar / ver / editar) ----- */
+
+.editorTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.voltar {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.voltar:hover {
+  color: var(--text);
+}
+
+.botaoExcluir {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s;
+}
+
+.botaoExcluir:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.campoTitulo {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+
+.campoCategoria {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+
+.campoCategoria:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-anel);
+}
+
+.campoConteudo {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--fonte-mono), monospace;
+  resize: vertical;
+  min-height: 320px;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+
+.campoTitulo:focus,
+.campoConteudo:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-anel);
+}
+
+.erro {
+  font-size: 13px;
+  color: #ef4444;
+}
+
+/* ----- Visualização (leitura) ----- */
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.botaoSecundario {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s;
+}
+
+.botaoSecundario:hover {
+  background: var(--hover);
+}
+
+.botaoCopiar {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s;
+}
+
+.botaoCopiar:hover {
+  background: var(--primary-anel);
+}
+
+.copiado {
+  background: var(--primary);
+  color: #fff;
+}
+
+.tituloDoc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  word-break: break-word;
+}
+
+/* Conteúdo Markdown renderizado */
+.markdown {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  margin: 1.4em 0 0.5em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.markdown h1 {
+  font-size: 22px;
+}
+.markdown h2 {
+  font-size: 19px;
+}
+.markdown h3 {
+  font-size: 16px;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown table {
+  margin: 0.7em 0;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.4em;
+}
+
+.markdown a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
+
+.markdown blockquote {
+  padding-left: 14px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+/* Código inline */
+.markdown code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--code);
+  font-family: var(--fonte-mono), monospace;
+  font-size: 0.9em;
+}
+
+/* Bloco de código */
+.markdown pre {
+  margin: 0.9em 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--code);
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  padding: 0;
+  background: none;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+.markdown th,
+.markdown td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.markdown th {
+  background: var(--hover);
+  font-weight: 600;
+}
