@@ -13,7 +13,7 @@ Todas as telas da V1 existem. Rotas: `/login`, `/cadastro`, `/esqueci-senha`, `/
 | # | Item | Onde a spec pede | Status |
 |---|---|---|---|
 | A | Sidebar + gaveta hambúrguer no mobile (< 768px) | RNF02.3 (obrigatório) · telas 2.2 | ✅ (falta opcional: busca e lista de categorias dentro da sidebar) |
-| B | Editor com pré-visualização Markdown ao vivo (split pane; abas no mobile) | telas 2.6 | ⬜ |
+| B | Editor com pré-visualização Markdown ao vivo (split pane; abas no mobile) | telas 2.6 | ✅ (falta opcional: barra de topo com modo/rascunho) |
 | C | `DialogoConfirmacao` (modal) + toasts de sucesso (hoje: `confirm()` nativo, sem toast) | telas 2.4/2.5/3 · RF02.4 | 🟡 |
 | D | `MenuAcoes` ("...") nos itens da lista (excluir direto da lista) | telas 2.4 | ⬜ |
 | E | Cor por categoria (`DotCategoria`) — exige coluna `cor` em `categorias` (migration) | telas 1/2.4 | ⬜ |

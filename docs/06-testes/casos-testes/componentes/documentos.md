@@ -71,6 +71,16 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
 - **Passos:** Renderizar o formulário.
 - **Resultado esperado:** As etiquetas aparecem como `<option>` dentro do `<datalist id="lista-etiquetas">`, na ordem recebida.
 
+## CT-91 — A pré-visualização renderiza o Markdown ao vivo conforme digita (spec 2.6)
+- **Pré-condições:** `FormularioDocumento` em modo de criação.
+- **Passos:** Confirmar que não há cabeçalho antes de digitar; digitar `# Olá` no campo "Conteúdo do documento".
+- **Resultado esperado:** O painel de pré-visualização passa a exibir um `<h1>` com o texto "Olá" (renderização ao vivo do Markdown).
+
+## CT-92 — No mobile, alternar para a aba "Pré-visualização" marca-a como ativa (spec 2.6)
+- **Pré-condições:** `FormularioDocumento` renderizado; abas visíveis (comportamento mobile).
+- **Passos:** Verificar que "Editar" começa ativa; clicar na aba "Pré-visualização".
+- **Resultado esperado:** A aba "Pré-visualização" passa a `aria-selected="true"` e "Editar" volta a `false`.
+
 ---
 
 ## Como rodar
