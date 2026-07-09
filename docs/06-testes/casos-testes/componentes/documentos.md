@@ -61,6 +61,16 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
 - **Passos:** Renderizar o formulário.
 - **Resultado esperado:** As categorias aparecem como `<option>` dentro do `<datalist>` (autocomplete), na ordem recebida.
 
+## CT-87 — (Editar) o campo Etiquetas vem preenchido com as etiquetas do documento
+- **Pré-condições:** `FormularioDocumento` em modo de edição, com um documento que tem `etiquetas`.
+- **Passos:** Renderizar o formulário passando o documento.
+- **Resultado esperado:** O campo "Etiquetas" vem preenchido com os nomes separados por vírgula (ex: `dart, testes`).
+
+## CT-88 — (Criar) as etiquetas existentes viram opções de autocomplete
+- **Pré-condições:** `FormularioDocumento` recebendo `etiquetasExistentes`.
+- **Passos:** Renderizar o formulário.
+- **Resultado esperado:** As etiquetas aparecem como `<option>` dentro do `<datalist id="lista-etiquetas">`, na ordem recebida.
+
 ---
 
 ## Como rodar

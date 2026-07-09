@@ -40,6 +40,22 @@ export function VisualizacaoDocumento({
       )}
       <h1 className={estilos.tituloDoc}>{documento.titulo}</h1>
 
+      {/* Etiquetas do documento: cada uma leva à lista filtrada por ela. */}
+      {documento.etiquetas && documento.etiquetas.length > 0 && (
+        <ul className={estilos.etiquetas} aria-label="Etiquetas">
+          {documento.etiquetas.map((e) => (
+            <li key={e.id}>
+              <Link
+                href={`/documentos?etiqueta=${e.id}`}
+                className={estilos.chipEtiqueta}
+              >
+                #{e.nome}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <article className={estilos.markdown}>
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {documento.conteudo}

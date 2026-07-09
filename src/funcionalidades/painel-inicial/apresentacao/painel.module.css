@@ -1,0 +1,233 @@
+/* Tela de Início (Dashboard). Usa os tokens de globals.css. */
+
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.titulo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.subtitulo {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.botaoPrimario {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 9px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.16s, transform 0.16s;
+}
+
+.botaoPrimario:hover {
+  box-shadow: 0 6px 20px var(--primary-sombra);
+  transform: translateY(-1px);
+}
+
+/* ----- Busca global ----- */
+
+.buscaForm {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.buscaInput {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 15px;
+}
+
+.buscaInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-anel);
+}
+
+.botaoSecundario {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s;
+}
+
+.botaoSecundario:hover {
+  background: var(--hover);
+  border-color: var(--primary);
+}
+
+/* ----- Cartões de contadores ----- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: border-color 0.16s, transform 0.16s;
+}
+
+.cartao:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.cartaoNumero {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.cartaoRotulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ----- Listas (favoritos e recentes) ----- */
+
+.colunas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 720px) {
+  .colunas {
+    grid-template-columns: 1fr;
+  }
+}
+
+.secao {
+  min-width: 0;
+}
+
+.secaoTopo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.secaoTitulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.secaoVazia {
+  padding: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.itens {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: border-color 0.16s, background 0.16s;
+}
+
+.item:hover {
+  border-color: var(--primary);
+  background: var(--hover);
+}
+
+.itemTitulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--primary-anel);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ----- Estados auxiliares ----- */
+
+.vazio {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.link {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
