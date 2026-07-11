@@ -1,6 +1,9 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/nucleo/supabase/servidor";
 import { AppShell } from "@/nucleo/componentes/AppShell";
+import { Toasts } from "@/nucleo/componentes/Toasts";
+import { TransicaoDeTela } from "@/nucleo/componentes/TransicaoDeTela";
 
 // Layout do grupo de rotas (autenticado): a guarda de sessão do app.
 // Toda página abaixo dele exige um usuário logado — se não houver, manda pro
@@ -19,5 +22,15 @@ export default async function LayoutAutenticado({
 
   if (!user) redirect("/login");
 
-  return <AppShell email={user.email ?? null}>{children}</AppShell>;
+  return (
+    <AppShell email={user.email ?? null}>
+      {/* Toasts de sucesso pós-redirect (lê ?aviso= da URL). useSearchParams
+          exige um limite de Suspense para não travar a renderização. */}
+      <Suspense fallback={null}>
+        <Toasts />
+      </Suspense>
+      {/* Fade de entrada a cada troca de tela (só o conteúdo, não o toast). */}
+      <TransicaoDeTela>{children}</TransicaoDeTela>
+    </AppShell>
+  );
 }

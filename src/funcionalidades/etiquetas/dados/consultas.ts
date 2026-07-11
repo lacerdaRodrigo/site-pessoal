@@ -137,3 +137,23 @@ export async function idsDocumentosComEtiqueta(
   if (error || !data) return [];
   return (data as { documento_id: string }[]).map((l) => l.documento_id);
 }
+
+/**
+ * Ids dos documentos que têm ALGUMA etiqueta cujo nome casa parcialmente com o
+ * termo (ILIKE) — usado pela busca global, que também procura por etiqueta
+ * (RF03.2). O `!inner` no embed transforma o join em filtrável: só voltam as
+ * junções cuja etiqueta bate. O RLS restringe tudo ao usuário logado.
+ */
+export async function idsDocumentosComEtiquetaLike(
+  termo: string,
+): Promise<string[]> {
+  const supabase = await criarClienteServidor();
+  const alvo = `%${escaparParaIlike(termo)}%`;
+  const { data, error } = await supabase
+    .from("documento_etiquetas")
+    .select("documento_id, etiquetas!inner(nome)")
+    .ilike("etiquetas.nome", alvo);
+
+  if (error || !data) return [];
+  return (data as { documento_id: string }[]).map((l) => l.documento_id);
+}

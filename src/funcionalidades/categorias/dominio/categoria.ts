@@ -37,3 +37,36 @@ export function nomeCategoriaValido(nome: string): boolean {
 export function normalizarNomeCategoria(nome: string): string {
   return nome.trim();
 }
+
+/**
+ * Paleta do `DotCategoria` (spec telas 1/2.4). Cores escolhidas para contrastar
+ * tanto no tema claro quanto no escuro. A cor de cada categoria é DERIVADA do
+ * nome (ver `corDaCategoria`), então não precisa ser guardada no banco — deixar
+ * o usuário escolher/editar a cor fica para a V2 (aí entra uma coluna `cor`).
+ */
+export const PALETA_CATEGORIAS = [
+  "#7c3aed", // roxo
+  "#0ea5e9", // azul
+  "#10b981", // verde
+  "#f59e0b", // âmbar
+  "#ef4444", // vermelho
+  "#ec4899", // rosa
+  "#14b8a6", // teal
+  "#8b5cf6", // violeta
+] as const;
+
+/**
+ * Cor determinística da categoria a partir do nome: mesmo nome → sempre a mesma
+ * cor da paleta, ignorando espaços nas pontas e maiúsculas/minúsculas. É pura
+ * (sem estado/banco), então o `DotCategoria` pode colorir a categoria onde quer
+ * que ela apareça (cards, filtros) só com o nome em mãos.
+ */
+export function corDaCategoria(nome: string): string {
+  const limpo = normalizarNomeCategoria(nome).toLowerCase();
+  // Hash simples e estável (base 31, mantido em 32 bits) → índice na paleta.
+  let hash = 0;
+  for (let i = 0; i < limpo.length; i++) {
+    hash = (hash * 31 + limpo.charCodeAt(i)) | 0;
+  }
+  return PALETA_CATEGORIAS[Math.abs(hash) % PALETA_CATEGORIAS.length];
+}

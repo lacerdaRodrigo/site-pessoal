@@ -16,6 +16,7 @@ test.describe("Documentos", () => {
 
     const titulo = `Documento E2E ${Date.now()}`;
     const categoria = `Cat E2E ${Date.now()}`;
+    const etiqueta = `etiquetae2e${Date.now()}`;
 
     // Login (redireciona para /, que leva à área autenticada /inicio).
     await page.goto("/login");
@@ -49,11 +50,12 @@ test.describe("Documentos", () => {
       page.getByRole("button", { name: "Remover dos favoritos" }),
     ).toBeVisible();
 
-    // EDITAR.
+    // EDITAR (também adiciona uma etiqueta, para exercitar a busca por etiqueta).
     await page.getByRole("link", { name: "Editar" }).click();
     await page
       .getByLabel("Conteúdo do documento")
       .fill("Conteúdo editado pelo teste E2E.");
+    await page.getByLabel("Etiquetas").fill(etiqueta);
     await page.getByRole("button", { name: "Salvar alterações" }).click();
 
     // Volta à leitura com o conteúdo atualizado. Espera o título (só existe na
@@ -62,19 +64,38 @@ test.describe("Documentos", () => {
     await expect(page.getByRole("heading", { name: titulo })).toBeVisible();
     await expect(page.getByText("Conteúdo editado pelo teste E2E.")).toBeVisible();
 
-    // BUSCAR pelo título na lista (RF03.2): o documento aparece no resultado.
+    // BUSCAR na lista (RF03.2): a busca global casa por título, conteúdo E
+    // etiqueta. Cada busca deve trazer o mesmo documento no resultado.
+    const rotuloBusca = "Buscar documentos por título, conteúdo ou etiqueta";
     await page.goto("/documentos");
-    await page.getByLabel("Buscar documentos por título").fill(titulo);
+
+    // por título
+    await page.getByLabel(rotuloBusca).fill(titulo);
     await page.getByRole("button", { name: "Buscar" }).click();
     await expect(page.getByText(titulo)).toBeVisible();
 
-    // EXCLUIR a partir da leitura (aceitando a confirmação — RF02.4).
-    await page.getByRole("link", { name: titulo }).click();
-    page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "Excluir" }).click();
+    // por conteúdo (uma palavra que só existe no corpo, não no título)
+    await page.getByLabel(rotuloBusca).fill("editado pelo teste");
+    await page.getByRole("button", { name: "Buscar" }).click();
+    await expect(page.getByText(titulo)).toBeVisible();
 
-    // De volta à lista, o documento não existe mais.
-    await expect(page).toHaveURL(/\/documentos$/);
+    // por etiqueta (o nome da tag adicionada na edição)
+    await page.getByLabel(rotuloBusca).fill(etiqueta);
+    await page.getByRole("button", { name: "Buscar" }).click();
+    await expect(page.getByText(titulo)).toBeVisible();
+
+    // EXCLUIR a partir da leitura: o botão abre o DialogoConfirmacao (não o
+    // confirm() nativo) e só o "Excluir" do modal remove de fato (RF02.4).
+    await page.getByRole("link", { name: titulo }).click();
+    await page.getByRole("button", { name: "Excluir" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Excluir" })
+      .click();
+
+    // De volta à lista, o toast confirma e o documento não existe mais.
+    await expect(page).toHaveURL(/\/documentos(\?|$)/);
+    await expect(page.getByRole("status")).toContainText("Documento excluído.");
     await expect(page.getByText(titulo)).toHaveCount(0);
   });
 });

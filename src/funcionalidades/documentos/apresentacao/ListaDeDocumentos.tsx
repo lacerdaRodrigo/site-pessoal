@@ -1,8 +1,13 @@
 import Link from "next/link";
-import type { Categoria } from "@/funcionalidades/categorias/dominio/categoria";
+import {
+  corDaCategoria,
+  type Categoria,
+} from "@/funcionalidades/categorias/dominio/categoria";
 import type { Etiqueta } from "@/funcionalidades/etiquetas/dominio/etiqueta";
+import { DotCategoria } from "@/nucleo/componentes/DotCategoria";
 import type { Documento } from "../dominio/documento";
 import { BotaoFavorito } from "./BotaoFavorito";
+import { AcoesDocumento } from "./AcoesDocumento";
 import estilos from "./documentos.module.css";
 
 // Server Component: exibe a lista com busca (RF03.2), filtro por categoria
@@ -57,9 +62,9 @@ export function ListaDeDocumentos({
         <input
           type="search"
           name="busca"
-          aria-label="Buscar documentos por título"
+          aria-label="Buscar documentos por título, conteúdo ou etiqueta"
           className={estilos.buscaInput}
-          placeholder="Buscar por título..."
+          placeholder="Buscar por título, conteúdo ou etiqueta..."
           defaultValue={busca}
         />
         <button type="submit" className={estilos.botaoSecundario}>
@@ -164,7 +169,12 @@ function Cards({ documentos }: { documentos: Documento[] }) {
       {documentos.map((doc) => (
         <li key={doc.id} className={estilos.item}>
           <Link href={`/documentos/${doc.id}`} className={estilos.card}>
-            <span className={estilos.cardTitulo}>{doc.titulo}</span>
+            <span className={estilos.cardTitulo}>
+              {doc.categoriaNome && (
+                <DotCategoria cor={corDaCategoria(doc.categoriaNome)} />
+              )}
+              {doc.titulo}
+            </span>
             <span className={estilos.cardMeta}>
               {doc.categoriaNome && (
                 <span className={estilos.chip}>{doc.categoriaNome}</span>
@@ -180,6 +190,7 @@ function Cards({ documentos }: { documentos: Documento[] }) {
             </span>
           </Link>
           <BotaoFavorito id={doc.id} eFavorito={doc.eFavorito} />
+          <AcoesDocumento id={doc.id} />
         </li>
       ))}
     </ul>

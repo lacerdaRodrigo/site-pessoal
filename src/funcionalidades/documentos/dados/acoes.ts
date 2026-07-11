@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { criarClienteServidor } from "@/nucleo/supabase/servidor";
 import { garantirCategoria } from "@/funcionalidades/categorias/dados/consultas";
 import {
   idsDocumentosComEtiqueta,
+  idsDocumentosComEtiquetaLike,
   sincronizarEtiquetas,
 } from "@/funcionalidades/etiquetas/dados/consultas";
 import { separarEtiquetas } from "@/funcionalidades/etiquetas/dominio/etiqueta";
@@ -81,6 +83,29 @@ function escaparParaIlike(texto: string): string {
   return texto.replace(/[\\%_]/g, "\\$&");
 }
 
+// Ids dos documentos que casam com o termo de busca por TÍTULO, CONTEÚDO ou
+// ETIQUETA (RF03.2 / telas 3). Resolve os três conjuntos com ILIKE
+// parametrizado (seguro contra injeção no filtro) e devolve a UNIÃO — a
+// listagem então restringe por `in(ids)`. A busca full-text de verdade
+// (tsvector) fica para quando a base crescer (ver guia, "Oportunidades").
+async function idsDocumentosQueBatem(
+  supabase: SupabaseClient,
+  termo: string,
+): Promise<string[]> {
+  const alvo = `%${escaparParaIlike(termo)}%`;
+  const [porTitulo, porConteudo, porEtiqueta] = await Promise.all([
+    supabase.from("documentos").select("id").ilike("titulo", alvo),
+    supabase.from("documentos").select("id").ilike("conteudo", alvo),
+    idsDocumentosComEtiquetaLike(termo),
+  ]);
+
+  const ids = new Set<string>();
+  (porTitulo.data as { id: string }[] | null)?.forEach((r) => ids.add(r.id));
+  (porConteudo.data as { id: string }[] | null)?.forEach((r) => ids.add(r.id));
+  porEtiqueta.forEach((id) => ids.add(id));
+  return [...ids];
+}
+
 export async function listarDocumentos(
   filtros: FiltrosDocumentos = {},
 ): Promise<Documento[]> {
@@ -95,14 +120,23 @@ export async function listarDocumentos(
     if (idsDaEtiqueta.length === 0) return [];
   }
 
+  // Busca global (RF03.2): casa por título, conteúdo OU etiqueta. Resolvemos os
+  // ids que batem e restringimos por `in`. Nenhum id = nenhum resultado (e o
+  // `in([])` do PostgREST é problemático), então já devolvemos vazio.
+  const busca = filtros.busca?.trim();
+  let idsDaBusca: string[] | null = null;
+  if (busca) {
+    idsDaBusca = await idsDocumentosQueBatem(supabase, busca);
+    if (idsDaBusca.length === 0) return [];
+  }
+
   let consulta = supabase
     .from("documentos")
     .select(SELECT_COM_RELACOES)
     .order("atualizado_em", { ascending: false });
 
-  const busca = filtros.busca?.trim();
-  if (busca) {
-    consulta = consulta.ilike("titulo", `%${escaparParaIlike(busca)}%`);
+  if (idsDaBusca) {
+    consulta = consulta.in("id", idsDaBusca);
   }
   if (filtros.categoriaId) {
     consulta = consulta.eq("categoria_id", filtros.categoriaId);
@@ -176,7 +210,7 @@ export async function criarDocumento(
   await sincronizarEtiquetas(supabase, user.id, data.id, etiquetas);
 
   revalidatePath("/documentos");
-  redirect(`/documentos/${data.id}`);
+  redirect(`/documentos/${data.id}?aviso=criado`);
 }
 
 export async function atualizarDocumento(
@@ -221,7 +255,7 @@ export async function atualizarDocumento(
 
   revalidatePath("/documentos");
   revalidatePath(`/documentos/${id}`);
-  redirect(`/documentos/${id}`);
+  redirect(`/documentos/${id}?aviso=salvo`);
 }
 
 export async function excluirDocumento(formData: FormData): Promise<void> {
@@ -231,7 +265,7 @@ export async function excluirDocumento(formData: FormData): Promise<void> {
     await supabase.from("documentos").delete().eq("id", id);
     revalidatePath("/documentos");
   }
-  redirect("/documentos");
+  redirect("/documentos?aviso=excluido");
 }
 
 export async function alternarFavorito(formData: FormData): Promise<void> {

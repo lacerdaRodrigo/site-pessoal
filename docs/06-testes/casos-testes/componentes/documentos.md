@@ -1,6 +1,6 @@
 # Casos de Teste (Componente) — Documentos
 
-Casos de teste de componente da funcionalidade de Documentos (RF02/RF03 — ver `docs/01-arquitetura/03-requisitos-funcionais.md`). Renderizam os componentes em memória (React Testing Library sobre Vitest/jsdom) e simulam a interação do usuário. As Server Actions de `dados/` são substituídas por mocks (`vi.mock`) — não é chamada de rede do ponto de vista do teste. Código em `src/funcionalidades/documentos/apresentacao/{FormularioDocumento,BotaoCopiar,BotaoExcluir,BotaoFavorito}.test.tsx`.
+Casos de teste de componente da funcionalidade de Documentos (RF02/RF03 — ver `docs/01-arquitetura/03-requisitos-funcionais.md`). Renderizam os componentes em memória (React Testing Library sobre Vitest/jsdom) e simulam a interação do usuário. As Server Actions de `dados/` são substituídas por mocks (`vi.mock`) — não é chamada de rede do ponto de vista do teste. Código em `src/funcionalidades/documentos/apresentacao/{FormularioDocumento,BotaoCopiar,BotaoExcluir,BotaoFavorito,AcoesDocumento}.test.tsx`.
 
 Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado correspondente, para rastrear um lado no outro.
 
@@ -36,10 +36,25 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
 - **Passos:** Clicar em "Copiar código".
 - **Resultado esperado:** O clipboard recebe o texto completo (fallback).
 
+## CT-97 — (Excluir) clicar em Excluir abre o diálogo de confirmação (sem confirm nativo)
+- **Pré-condições:** `BotaoExcluir` renderizado. A Server Action de exclusão está mockada.
+- **Passos:** Verificar que não há modal; clicar em "Excluir".
+- **Resultado esperado:** Antes do clique não existe `role="dialog"`. Após o clique, o `DialogoConfirmacao` do app aparece com o título "Excluir documento?" — o `confirm()` nativo do navegador não é mais usado (spec telas 2.5).
+
 ## CT-46 — (Excluir) cancelar a confirmação não exclui (RF02.4)
-- **Pré-condições:** `BotaoExcluir`. O diálogo de confirmação (`window.confirm`) está mockado para retornar "cancelar" (false).
-- **Passos:** Clicar em "Excluir" e cancelar a confirmação.
-- **Resultado esperado:** A confirmação foi solicitada, mas a Server Action de exclusão **não** foi disparada — nada é apagado sem o "sim" do usuário.
+- **Pré-condições:** `BotaoExcluir` com o diálogo aberto. A Server Action de exclusão está mockada.
+- **Passos:** Abrir o diálogo e cancelar pressionando Esc.
+- **Resultado esperado:** O diálogo fecha e a Server Action de exclusão **não** foi disparada — nada é apagado sem o "sim" do usuário.
+
+## CT-100 — (Lista) escolher "Excluir" no menu ⋯ abre o diálogo de confirmação (RF02.4)
+- **Pré-condições:** `AcoesDocumento` (menu ⋯ do item da lista). A Server Action de exclusão está mockada.
+- **Passos:** Abrir o menu "⋯" e clicar em "Excluir".
+- **Resultado esperado:** O `DialogoConfirmacao` (variante perigo) aparece com o título "Excluir documento?" — a exclusão pela lista passa pela mesma confirmação da tela de leitura.
+
+## CT-101 — (Lista) cancelar (Esc) o diálogo não exclui
+- **Pré-condições:** `AcoesDocumento` com o diálogo já aberto pelo menu ⋯.
+- **Passos:** Abrir o menu, clicar em "Excluir" e pressionar Esc.
+- **Resultado esperado:** O diálogo fecha e a Server Action de exclusão **não** foi disparada.
 
 ## CT-75 — (Favoritar) documento não-favorito mostra a estrela vazia (RF03.3)
 - **Pré-condições:** `BotaoFavorito` com `eFavorito={false}`.

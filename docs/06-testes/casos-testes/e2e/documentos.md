@@ -14,10 +14,10 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
   3. Preencher título (único, com timestamp), **categoria** (única, RF03.1) e conteúdo; clicar em "Criar documento".
   4. Na tela de **leitura**, conferir que o título aparece como cabeçalho, a **categoria** aparece e o conteúdo é renderizado.
   5. Clicar em "Adicionar aos favoritos" (RF03.3) e conferir que a estrela vira "Remover dos favoritos".
-  6. Clicar em "Editar", alterar o conteúdo e clicar em "Salvar alterações"; conferir o conteúdo atualizado na leitura.
-  7. Voltar para `/documentos`, **buscar** pelo título (RF03.2) e conferir que o documento aparece no resultado.
-  8. Abrir o documento, clicar em "Excluir" e **aceitar** a confirmação (RF02.4).
-- **Resultado esperado:** Após a exclusão, volta para a lista (`/documentos`) e o documento criado **não** aparece mais. O teste é auto-limpante: como cria e apaga o mesmo documento, não deixa resíduo no banco.
+  6. Clicar em "Editar", alterar o conteúdo, **adicionar uma etiqueta** e clicar em "Salvar alterações"; conferir o conteúdo atualizado na leitura.
+  7. Voltar para `/documentos` e **buscar** (RF03.2) três vezes — por **título**, por uma palavra só do **conteúdo** e pelo nome da **etiqueta** — conferindo em cada uma que o documento aparece no resultado.
+  8. Abrir o documento e clicar em "Excluir": conferir que abre o `DialogoConfirmacao` (não o `confirm()` nativo) e clicar no "Excluir" **do modal** para confirmar (RF02.4).
+- **Resultado esperado:** Após a exclusão, volta para a lista (`/documentos`), um **toast** "Documento excluído." é exibido e o documento criado **não** aparece mais. O teste é auto-limpante: como cria e apaga o mesmo documento, não deixa resíduo no banco.
 
 ---
 
