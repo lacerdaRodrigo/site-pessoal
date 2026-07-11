@@ -31,6 +31,16 @@ Cada caso tem um ID (`CT-XX`) que aparece também no nome do teste automatizado 
 - **Passos:** Chamar `normalizarNomeCategoria("  Git  ")` e `normalizarNomeCategoria("   ")`.
 - **Resultado esperado:** Retorna `"Git"` no primeiro e `""` no segundo (o vazio sinaliza "sem categoria" para quem chama).
 
+## CT-102 — Cor da categoria é determinística e sempre da paleta (telas 1/2.4)
+- **Pré-condições:** Nenhuma.
+- **Passos:** Chamar `corDaCategoria("Git")` duas vezes.
+- **Resultado esperado:** As duas chamadas devolvem a mesma cor (determinística) e essa cor pertence a `PALETA_CATEGORIAS`.
+
+## CT-103 — Cor ignora espaços/maiúsculas e distribui entre nomes
+- **Pré-condições:** Nenhuma.
+- **Passos:** Comparar `corDaCategoria("  git  ")` com `corDaCategoria("Git")`; mapear um punhado de nomes distintos para cores.
+- **Resultado esperado:** `"  git  "` e `"Git"` dão a mesma cor (normaliza e ignora caixa); um conjunto de nomes diferentes produz mais de uma cor (não colapsa tudo numa só).
+
 ---
 
 ## Como rodar

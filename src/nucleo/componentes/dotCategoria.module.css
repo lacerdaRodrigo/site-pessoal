@@ -1,0 +1,10 @@
+/* Dot da categoria: quadradinho de 8px com cantos levemente arredondados
+   (spec telas 1/2.4). A cor vem inline (via prop), então aqui só o formato. */
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}

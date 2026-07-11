@@ -14,12 +14,12 @@ Todas as telas da V1 existem. Rotas: `/login`, `/cadastro`, `/esqueci-senha`, `/
 |---|---|---|---|
 | A | Sidebar + gaveta hambúrguer no mobile (< 768px) | RNF02.3 (obrigatório) · telas 2.2 | ✅ (falta opcional: busca e lista de categorias dentro da sidebar) |
 | B | Editor com pré-visualização Markdown ao vivo (split pane; abas no mobile) | telas 2.6 | ✅ (falta opcional: barra de topo com modo/rascunho) |
-| C | `DialogoConfirmacao` (modal) + toasts de sucesso (hoje: `confirm()` nativo, sem toast) | telas 2.4/2.5/3 · RF02.4 | 🟡 |
-| D | `MenuAcoes` ("...") nos itens da lista (excluir direto da lista) | telas 2.4 | ⬜ |
-| E | Cor por categoria (`DotCategoria`) — exige coluna `cor` em `categorias` (migration) | telas 1/2.4 | ⬜ |
-| F | Extrair componentes reutilizáveis para `src/nucleo/componentes/` | telas 1 | 🟡 (começou no AppShell) |
-| G | Busca por conteúdo e por etiqueta (hoje só por título) | telas 3 · RF03.2 | 🟡 (conteúdo adiado de propósito) |
-| H | Transição de entrada (fade) ao trocar de tela | telas 3 | ⬜ (cosmético) |
+| C | `DialogoConfirmacao` (modal) + toasts de sucesso | telas 2.4/2.5/3 · RF02.4 | ✅ (excluir usa o modal; criar/salvar/excluir mostram toast via `?aviso=`) |
+| D | `MenuAcoes` ("...") nos itens da lista (excluir direto da lista) | telas 2.4 | ✅ (menu ⋯ por item → Excluir abre o `DialogoConfirmacao` e o toast) |
+| E | Cor por categoria (`DotCategoria`) | telas 1/2.4 | ✅ (cor **derivada do nome** no domínio, sem coluna/migration; persistir/customizar a cor fica p/ V2) |
+| F | Extrair componentes reutilizáveis para `src/nucleo/componentes/` | telas 1 | 🟡 (AppShell, DialogoConfirmacao, Toasts, MenuAcoes, DotCategoria, TransicaoDeTela) |
+| G | Busca por conteúdo e por etiqueta | telas 3 · RF03.2 | ✅ (busca global casa título + conteúdo + etiqueta via ILIKE; full-text `tsvector` fica p/ quando crescer) |
+| H | Transição de entrada (fade) ao trocar de tela | telas 3 | ✅ (`TransicaoDeTela` na área autenticada, respeita prefers-reduced-motion) |
 
 ## Reconciliações de documentação (não é código)
 
@@ -33,6 +33,7 @@ Todas as telas da V1 existem. Rotas: `/login`, `/cadastro`, `/esqueci-senha`, `/
 - Modo Portfólio (página pública curada).
 - Assistente de IA embutido (via API) e auto-classificação de categoria.
 - Integrações de produtividade: exportar (MD/PDF), atalhos de teclado.
+- **Cor de categoria persistida/customizável** — hoje a cor é derivada do nome (`corDaCategoria`); deixar o usuário escolher/editar exige uma coluna `cor` em `categorias` (migration) + UI de seleção.
 
 ## V3 — Multiusuário e Colaboração
 
@@ -46,5 +47,4 @@ Todas as telas da V1 existem. Rotas: `/login`, `/cadastro`, `/esqueci-senha`, `/
 
 ## Pendências operacionais (não são código)
 
-- 🔴 `supabase db push` da migration de etiquetas — trava o runtime até rodar.
 - 🟡 Templates de e-mail no Supabase (Confirm signup, Reset password).
