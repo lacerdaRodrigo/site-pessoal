@@ -26,6 +26,13 @@ npm run dev          # http://localhost:3000
 | `npm run build` | Build de produção + type-check |
 | `npm run test:e2e` | E2E (Playwright) — precisa de `.env.test.local` com credenciais |
 
+## Funcionalidades (V1)
+
+- **Autenticação** — cadastro, login, logout e recuperação de senha (Supabase Auth).
+- **Documentos** — CRUD com editor Markdown + pré-visualização ao vivo e botão "copiar código"; exclusão com confirmação em **modal** e **toasts** de sucesso, direto da lista (menu `⋯`) ou da leitura.
+- **Organização** — categorias (com cor derivada do nome) e etiquetas (N:N); **busca global** por título, conteúdo e etiqueta; favoritos.
+- **Painel e conta** — dashboard com visão geral; perfil e tema claro/escuro/sistema; transição suave ao trocar de tela.
+
 ## Arquitetura em um parágrafo
 
 Organização **feature-first**: cada funcionalidade em `src/funcionalidades/<nome>/` dividida em `dominio/` (regras puras), `dados/` (Server Actions que falam com o Supabase) e `apresentacao/` (componentes); o compartilhado fica em `src/nucleo/`. O acesso a dados usa **Server Actions + Server Components**, com **RLS** no Postgres garantindo que cada usuário só veja os próprios dados. Detalhes em [`docs/01-arquitetura/`](docs/01-arquitetura/).
@@ -49,4 +56,4 @@ Para desenvolver neste repositório, veja também [`CLAUDE.md`](CLAUDE.md) (conv
 
 ## Licença / status
 
-Projeto pessoal de estudos, em desenvolvimento (V1 / MVP). Repositório: [`lacerdaRodrigo/site-pessoal`](https://github.com/lacerdaRodrigo/site-pessoal).
+Projeto pessoal de estudos. **V1 (MVP) funcionalmente completa** — os próximos passos (V2/V3: compartilhamento, IA, multiusuário) estão no [roadmap](docs/08-roadmap/). Repositório: [`lacerdaRodrigo/site-pessoal`](https://github.com/lacerdaRodrigo/site-pessoal).
